@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../css/TIL_style.css">
+    <title>Title</title>
+</head>
+<body>
+<section class="ftco-section">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center mb-5">
+            <h2 class="heading-section">2024년 5월 8일 오후</h2>
+        </div>
+    </div>
+    <div class="remote">
+        <button onclick="goBack()" class="btn btn-primary">뒤로가기</button>
+    </div>
+    <div class="position-center">
+        <div class="code-area">
+            <h4 class="code-head">taglib을 사용하여 빈의 정보를 폼으로 받아오기</h4>
+            <h5 class="code-head">Data.java</h5>
+            <xmp class="code-text">
+package kr.bit.beans;
+
+@lombok.Data
+public class Data {
+    private String name;
+    private String id;
+    private String password;
+    private String address1;
+    private String address2;
+}
+            </xmp>
+            <h5 class="code-head">index.jsp</h5>
+            <xmp class="code-text">
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+<a href="test1">test1</a>
+
+<a href="test2">test2</a>
+
+<a href="test3">test3</a>
+
+<a href="test4">test4</a>
+
+</body>
+</html>
+            </xmp>
+            <h5 class="code-head">SpringController.java</h5>
+            <xmp class="code-text">
+package kr.bit.controller;
+
+import kr.bit.beans.Data;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
+
+import javax.servlet.http.HttpServletRequest;
+
+
+@Controller
+public class SpringController {
+
+    @GetMapping("/test1")
+    public String test1(Data bean) {
+        bean.setName("지훈");
+        bean.setId("jihun");
+        bean.setPassword("1234");
+        bean.setAddress1("seoul");
+        bean.setAddress2("gangnam");
+
+        return "test1";
+    }
+
+    @GetMapping("/test2")
+    public String test2(Data bean) {
+        bean.setName("태웅");
+        bean.setId("gtw");
+        bean.setPassword("1234");
+        bean.setAddress1("seoul");
+        bean.setAddress2("songpa");
+
+        return "test2";
+    }
+
+    @GetMapping("/test3")
+    public String test3(@ModelAttribute("modelBean") Data bean) {
+        bean.setName("mintaek");
+        bean.setId("omt");
+        bean.setPassword("1234");
+        bean.setAddress1("seoul");
+        bean.setAddress2("gangbook");
+
+        return "test3";
+    }
+
+    @GetMapping("/test4")
+    public String test4(Model model) {
+        Data bean = new Data();
+        bean.setName("seongjin");
+        bean.setId("jsj");
+        bean.setPassword("1234");
+        bean.setAddress1("seoul");
+        bean.setAddress2("hangang");
+
+        model.addAttribute("modelBean", bean);
+
+        return "test4";
+    }
+}
+            </xmp>
+            <h5 class="code-head">test1.jsp</h5>
+            <xmp class="code-text">
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+</head>
+<body>
+<form action="final" method="post">
+    이름: <input type="text" name="name" value="${requestScope.data.name}"><br>
+    아이디: <input type="text" name="id" value="${data.id}"><br>
+    비번: <input type="password" name="password" value="${data.password}"><br>
+    주소1: <input type="text" name="address1" value="${requestScope.data.address1}"><br>
+    주소2: <input type="text" name="address2" value="${requestScope.data.address2}"><br>
+
+    <button type="submit">체크</button>
+</form>
+</body>
+</html>
+
+            </xmp>
+            <h5 class="code-head">test2.jsp</h5>
+            <xmp class="code-text">
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+</head>
+<body>
+<form:form action="final" modelAttribute="data">
+    <%--path 이름과 설정한 필드명이 같아야 한다--%>
+    이름: <form:input path="name"/><br>
+    아이디: <form:input path="id"/><br>
+    비밀번호: <form:input path="password"/><br>
+    주소1: <form:input path="address1"/><br>
+    주소2: <form:input path="address2"/><br>
+</form:form>
+</body>
+</html>
+
+            </xmp>
+            <h5 class="code-head">test3.jsp</h5>
+            <xmp class="code-text">
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+</head>
+<body>
+<form:form action="final" modelAttribute="modelBean">
+    이름: <form:input path="name"/><br>
+    아이디: <form:input path="id"/><br>
+    비밀번호: <form:password path="password" showPassword="true"/><br>
+    주소1: <form:input path="address1"/><br>
+    주소2: <form:input path="address2"/><br>
+</form:form>
+</body>
+</html>
+
+            </xmp>
+            <h5 class="code-head">test4.jsp</h5>
+            <xmp class="code-text">
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+</head>
+<body>
+<form:form action="final" modelAttribute="modelBean">
+    이름: <form:input path="name"/><br>
+    아이디: <form:input path="id"/><br>
+    비밀번호: <form:password path="password" showPassword="true"/><br>
+    주소1: <form:input path="address1"/><br>
+    주소2: <form:input path="address2"/><br>
+</form:form>
+</body>
+</html>
+
+            </xmp>
+        </div>
+    </div>
+</section>
+
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+</body>
+</html>

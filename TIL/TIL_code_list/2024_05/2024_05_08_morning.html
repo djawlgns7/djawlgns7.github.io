@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../css/TIL_style.css">
+    <title>Title</title>
+</head>
+<body>
+<section class="ftco-section">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center mb-5">
+            <h2 class="heading-section">2024년 5월 1일 오전</h2>
+        </div>
+    </div>
+    <div class="remote">
+        <button onclick="goBack()" class="btn btn-primary">뒤로가기</button>
+    </div>
+    <div class="position-center">
+        <div class="code-area">
+            <h4 class="code-head">웹 애플리케이션 구성 요소에 값을 저장하고 데이터 전달하기</h4>
+            <h5 class="code-head">index.jsp</h5>
+            <xmp class="code-text">
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+	<a href="test1?data1=10&data2=20&data3=30&data3=40">test1</a><br>
+	<a href="test2">test2</a><br>
+	<a href="test3">test3</a><br>
+	<a href="test4">test4</a><br>
+</body>
+</html>
+            </xmp>
+            <h5 class="code-head">SpringController.java</h5>
+            <xmp class="code-text">
+package kr.bit.controller;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.servlet.ModelAndView;
+
+@Controller
+public class SpringController {
+	@GetMapping("/test1")
+	public String test1() {
+		return "test1";
+	}
+
+	@GetMapping("/test2")
+	public String test2(HttpServletRequest request) {
+		request.setAttribute("data1", "리퀘스트에 저장된 data1");
+		request.setAttribute("data2", "리퀘스트에 저장된 data2");
+		return "test2";
+	}
+
+	@GetMapping("/test3")
+	public String test3(Model model) {
+		model.addAttribute("data1", "모델에 저장된 data1");
+		model.addAttribute("data2", "모델에 저장된 data2");
+		return "test3";
+	}
+
+	@GetMapping("/test4")
+	public ModelAndView test4(ModelAndView mav) {
+		mav.addObject("data1", "모델&뷰에 저장된 data1");
+		mav.addObject("data2", "모델&뷰에 저장된 data2");
+		mav.setViewName("test4");
+
+		return mav;
+	}
+}
+
+            </xmp>
+            <h5 class="code-head">test3.jsp</h5>
+            <xmp class="code-text">
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+${requestScope.data1 }<br>
+<!-- Scope는 생략가능 -->
+${data2 }
+</body>
+</html>
+            </xmp>
+            <h5 class="code-head">test4.jsp</h5>
+            <xmp class="code-text">
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+${requestScope.data1 }<br>
+${data2 }
+</body>
+</html>
+            </xmp>
+        </div>
+    </div>
+</section>
+
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+</body>
+</html>
