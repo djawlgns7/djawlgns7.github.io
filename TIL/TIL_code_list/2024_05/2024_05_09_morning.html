@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../css/TIL_style.css">
+    <title>Title</title>
+</head>
+<body>
+<section class="ftco-section">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center mb-5">
+            <h2 class="heading-section">2024년 5월 9일 오전</h2>
+        </div>
+    </div>
+    <div class="remote">
+        <button onclick="goBack()" class="btn btn-primary">뒤로가기</button>
+    </div>
+    <div class="position-center">
+        <div class="code-area">
+            <h4 class="code-head">세션에 값 저장 후 꺼내오기 연습</h4>
+            <h5 class="code-head">index.jsp</h5>
+            <xmp class="code-text">
+    <%@ page language="java" contentType="text/html; charset=UTF-8"
+        pageEncoding="UTF-8"%>
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <meta charset="UTF-8">
+    <title>Insert title here</title>
+    </head>
+    <body>
+<%--    session: 브라우저가 서버에 요청을 하게 되면 브라우저 당 하나씩 메모리 공간을 서버에서 할당해줌
+        요청이 새롭게 발행해도 같은 메모리 공간을 사용한다--%>
+<%--    @SessionScope: 최초의 요청 ~ 브라우저를 닫을 때 까지--%>
+    <a href="test1">test1</a><br>
+    <a href="test2">test2</a><br>
+    <a href="test3">test3</a><br>
+
+    <a href="spring1">spring1</a><br>
+
+    <a href="test4">test4</a><br>
+    <a href="spring4">spring4</a><br>
+
+    <a href="test5">test5</a><br><br>
+
+    <a href="clear">clear session</a><br>
+    </body>
+    </html>
+            </xmp>
+            <h5 class="code-head">result.jsp</h5>
+            <xmp class="code-text">
+<%@ page import="java.util.Enumeration" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+</head>
+<body>
+<h1>세션의 값들</h1>
+<%
+    Enumeration<String> sessionNames = session.getAttributeNames();
+
+    while(sessionNames.hasMoreElements()) {
+        String sessionName = sessionNames.nextElement();
+%>
+<%=sessionName%>: <%=session.getAttribute(sessionName)%><br>
+<%
+    }
+%>
+</body>
+</html>
+
+            </xmp>
+            <h5 class="code-head">Data.java</h5>
+            <xmp class="code-text">
+package kr.bit.beans;
+
+@lombok.Data
+public class Data {
+    String str1;
+    String str2;
+}
+
+            </xmp>
+            <h5 class="code-head">SpringController.java</h5>
+            <xmp class="code-text">
+package kr.bit.controller;
+
+import kr.bit.beans.Data;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpSession;
+import java.util.Enumeration;
+
+
+@Controller
+// ModelAttribute주입시 Session으로 영역을 지정하면 Session으로 바뀜
+@SessionAttributes({"sBean", "sBean2"})
+public class SpringController {
+
+    //객체를 생성해서 반환하는 메소드를 작성해야만 Session 영역으로 바뀜
+    @ModelAttribute("sBean")
+    public Data sBean(){
+        return new Data();
+    }
+
+    //객체를 생성해서 반환하는 메소드를 작성해야만 Session 영역으로 바뀜
+    @ModelAttribute("sBean2")
+    public Data sBean2(){
+        return new Data();
+    }
+
+    @GetMapping("/test1")
+    public String test1(HttpSession session) {
+        session.setAttribute("data1", "spring1");
+
+        return "result";
+    }
+
+    @GetMapping("/test2")
+    public String test2(HttpSession session) {
+        session.setAttribute("data1", "spring1");
+
+        return "redirect:/spring1";
+    }
+
+    @GetMapping("/spring1")
+    public String spring1(HttpSession session) {
+        String str = (String) session.getAttribute("data1");
+        System.out.println(str);
+
+        session.setAttribute("data2", "spring2");
+
+        return "result";
+    }
+
+    @GetMapping("/test3")
+    public String test3(HttpSession session) {
+        session.setAttribute("data3", "spring3");
+
+        return "result";
+    }
+
+    @GetMapping("/test4")
+    public String test4(HttpSession session) {
+        Data data = new Data();
+        data.setStr1("dataString1");
+        data.setStr2("dataString2");
+
+        session.setAttribute("dataBean", data);
+
+        return "redirect:/spring4";
+    }
+
+    @GetMapping("/spring4")
+    // 세션 영역에 저장되어 있는 데이터를 사용
+    public String spring4(@SessionAttribute("dataBean") Data data) {
+        System.out.println(data.getStr1());
+        System.out.println(data.getStr2());
+
+        return "result";
+    }
+
+    @GetMapping("/test5")
+    // modelAttribute는 request 영역에 저장됨
+    public String test5(@ModelAttribute("sBean") Data dataBean, @ModelAttribute("sBean2") Data dataBean2) {
+        dataBean.setStr1("dataString1");
+        dataBean.setStr2("dataString2");
+
+        dataBean2.setStr1("dataString3");
+        dataBean2.setStr2("dataString4");
+
+        return "result";
+    }
+
+    @GetMapping("/clear")
+    public String clear(HttpSession session) {
+        Enumeration<String> keys = session.getAttributeNames();
+        while (keys.hasMoreElements()) {
+            session.removeAttribute(keys.nextElement());
+        }
+
+        System.out.println("세션 비우기 완료");
+
+        return "index";
+    }
+
+}
+            </xmp>
+            <h4 class="code-head">Bean Validation API와 taglib을 이용해서 간단하게 오류메시지 표시하기</h4>
+            <h5 class="code-head">error.properties</h5>
+            <xmp class="code-text">
+Max.data.num1 = num1값은 100이 넘어가면 안된다
+Size.data.string1 = string1값은 크기가 4에서 10 사이여야 한다
+            </xmp>
+            <h5 class="code-head">ServletAppContext.java</h5>
+            <xmp class="code-text">
+package kr.bit.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@Configuration
+@EnableWebMvc
+@ComponentScan("kr.bit.controller")
+public class ServletAppContext implements WebMvcConfigurer{
+
+	@Override
+	public void configureViewResolvers(ViewResolverRegistry registry) {
+		WebMvcConfigurer.super.configureViewResolvers(registry);
+		registry.jsp("/WEB-INF/views/",".jsp");
+	}
+
+	// properties 파일을 jsp화면에 가져가기 위해 등록해야 함
+	@Override
+	public void addResourceHandlers(ResourceHandlerRegistry registry) {
+		WebMvcConfigurer.super.addResourceHandlers(registry);
+		registry.addResourceHandler("/**").addResourceLocations("/resources/");
+	}
+
+	@Bean(name = "messageSource")
+	public ReloadableResourceBundleMessageSource messageSource() {
+		ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+
+		//messageSource.setBasename(null);
+		messageSource.setBasename("/WEB-INF/properties/error");
+		//추가된 코드
+		messageSource.setDefaultEncoding("UTF-8");
+
+		return messageSource;
+	}
+}
+
+            </xmp>
+            <h5 class="code-head">SpringController.java</h5>
+            <xmp class="code-text">
+package kr.bit.controller;
+
+import kr.bit.beans.Data;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+
+import javax.validation.Valid;
+
+@Controller
+public class SpringController {
+    @GetMapping("/test1")
+    public String test1(@ModelAttribute Data data) {
+        return "test1";
+    }
+
+    @PostMapping("/test1_proc")
+    public String test1_proc(@Valid Data data, BindingResult bindingResult) {
+        if(bindingResult.hasErrors()) {
+            // 유효성 검사에 위배됐을 경우 오류메시지를 띄움
+            return "test1";
+        }
+        return "test2";
+    }
+}
+            </xmp>
+            <h5 class="code-head">test1.jsp</h5>
+            <xmp class="code-text">
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+</head>
+<body>
+<form:form action="test1_proc" modelAttribute="data" method="post">
+    num1: <form:input path="num1" /><br>
+    <form:errors path="num1"/><br>
+    string1: <form:input path="string1" /><br>
+    <form:errors path="string1"/><br>
+    <button type="submit">확인</button>
+</form:form>
+</body>
+</html>
+
+            </xmp>
+        </div>
+    </div>
+</section>
+
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+</body>
+</html>

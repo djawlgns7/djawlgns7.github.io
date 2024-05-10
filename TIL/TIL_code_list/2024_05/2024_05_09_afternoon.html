@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../css/TIL_style.css">
+    <title>Title</title>
+</head>
+<body>
+<section class="ftco-section">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center mb-5">
+            <h2 class="heading-section">2024년 5월 9일 오후</h2>
+        </div>
+    </div>
+    <div class="remote">
+        <button onclick="goBack()" class="btn btn-primary">뒤로가기</button>
+    </div>
+    <div class="position-center">
+        <div class="code-area">
+            <h4 class="code-head">배열의 데이터를 받아서 select와 radio 버튼을 한번에 생성하기</h4>
+            <h5 class="code-head">test1.jsp</h5>
+            <xmp class="code-text">
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+</head>
+<body>
+<form:form modelAttribute="customer" action="test2" method="post">
+    <form:select path="chosenKorean">
+        <form:options items="${koreanMenus}"/>
+    </form:select>
+    <br><br>
+    <form:radiobuttons path="chosenChinese" items="${chineseMenus}"/>
+    <br><br>
+    <form:select path="value">
+        <form:options items="${menus}" itemLabel="name" itemValue="value"/>
+    </form:select><br>
+
+    <button type="submit">제출</button>
+</form:form>
+</body>
+</html>
+
+            </xmp>
+            <h5 class="code-head">test2.jsp</h5>
+            <xmp class="code-text">
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+</head>
+<body>
+한식: ${customer.chosenKorean}<br>
+중식: ${customer.chosenChinese}<br>
+가격: ${customer.value}<br>
+</body>
+</html>
+
+            </xmp>
+            <h5 class="code-head">Customer.java</h5>
+            <xmp class="code-text">
+package kr.bit.beans;
+
+import lombok.Data;
+
+@Data
+public class Customer {
+    private String chosenChinese;
+    private String chosenKorean;
+    private int value;
+}
+
+            </xmp>
+            <h5 class="code-head">Menu.java</h5>
+            <xmp class="code-text">
+package kr.bit.beans;
+
+import lombok.Data;
+
+@Data
+public class Menu {
+    private String name;
+    private int value;
+
+    public Menu(String name, int value) {
+        this.name = name;
+        this.value = value;
+    }
+}
+
+            </xmp>
+            <h5 class="code-head">SpringController.java</h5>
+            <xmp class="code-text">
+package kr.bit.controller;
+
+import kr.bit.beans.*;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Controller
+public class SpringController {
+    @GetMapping("/test1")
+    public String test1(Customer customer, Model model) {
+        customer.setChosenChinese("짬뽕");
+        customer.setChosenKorean("된장국");
+        customer.setValue(20000);
+
+        List<Menu> menus = new ArrayList<>();
+
+        menus.add(new Menu("짜장면", 10000));
+        menus.add(new Menu("짬뽕", 20000));
+        menus.add(new Menu("탕수육", 30000));
+
+        String[] chineseMenus = {"짜장면", "짬뽕", "탕수육"};
+        String[] koreanMenus = {"김치찌개", "부대찌개", "된장국"};
+
+        model.addAttribute("chineseMenus", chineseMenus);
+        model.addAttribute("koreanMenus", koreanMenus);
+        model.addAttribute("menus", menus);
+
+        return "test1";
+    }
+
+    @PostMapping("/test2")
+    public String test2(Customer customer, Model model) {
+        return "test2";
+    }
+
+}
+            </xmp>
+        </div>
+    </div>
+</section>
+
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+</body>
+</html>
