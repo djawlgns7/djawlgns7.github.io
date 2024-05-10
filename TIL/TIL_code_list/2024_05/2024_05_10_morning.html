@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../css/TIL_style.css">
+    <title>Title</title>
+</head>
+<body>
+<section class="ftco-section">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center mb-5">
+            <h2 class="heading-section">2024년 5월 10일 오전</h2>
+        </div>
+    </div>
+    <div class="remote">
+        <button onclick="goBack()" class="btn btn-primary">뒤로가기</button>
+    </div>
+    <div class="position-center">
+        <div class="code-area">
+            <h4 class="code-head">회원가입 폼을 만들고 모든 필드에 유효성 검사를 실시, 회원가입이 성공되면 입력한 모든 데이터를 새 창에 띄우는 사이트</h4>
+            <h5 class="code-head">user.java</h5>
+            <xmp class="code-text">
+package kr.bit.beans;
+
+import lombok.Data;
+
+import javax.validation.constraints.*;
+import java.util.ArrayList;
+import java.util.List;
+
+@Data
+public class User {
+    @NotEmpty
+    @Pattern(regexp = "[가-힣]*")
+    private String name;
+    @NotEmpty
+    private String personalID1;
+    private String personalID2;
+    @NotEmpty
+    @Pattern(regexp = "[a-zA-z0-9]*")
+    @Size(min = 4)
+    private String ID;
+    @NotEmpty
+    @Pattern(regexp = "[a-zA-z0-9]*")
+    private String password1;
+    private String password2;
+    @NotEmpty
+    @Pattern(regexp = "[a-zA-z0-9]*")
+    @Size(max = 10)
+    private String email1;
+    @NotEmpty
+    private String email2;
+    @NotEmpty
+    private String postNumber;
+    @NotEmpty
+    @Pattern(regexp = "[가-힣0-9]*")
+    private String address1;
+    @NotEmpty
+    @Pattern(regexp = "[가-힣0-9]*")
+    private String address2;
+    @NotEmpty
+    @Pattern(regexp = "[0-9-]*")
+    private String phone;
+    private List<String> jobs;
+    @NotNull
+    private Boolean agreeAdvertisement;
+
+    public User(){
+        this.jobs = new ArrayList<>();
+    }
+}
+
+            </xmp>
+            <h5 class="code-head">signUp,jsp</h5>
+            <xmp class="code-text">
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <style>
+        .title{
+            display: inline-block;
+            width: 180px;
+        }
+
+        .essential{
+            color: red;
+        }
+
+        .redChar{
+            color: red;
+        }
+    </style>
+</head>
+<body>
+<form:form modelAttribute="user" method="post" action="signUpCheck">
+    <span class="title">이름</span><span class="essential">*</span>
+    <form:input path="name" type="text"/><br>
+    <form:errors cssClass="redChar" path="name"/><br>
+
+    <span class="title">주민등록번호</span><span class="essential">*</span>
+    <form:input path="personalID1" type="text"/>-<form:input path="personalID2" type="text"/><br>
+    <form:errors cssClass="redChar" path="personalID1"/><br>
+
+    <span class="title">아이디</span><span class="essential">*</span>
+    <form:input path="ID" type="text"/><br>
+    <form:errors cssClass="redChar" path="ID"/><br>
+
+    <span class="title">비밀번호</span><span class="essential">*</span>
+    <form:input path="password1" type="password"/><br>
+    <form:errors cssClass="redChar" path="password1"/><br>
+
+    <span class="title">비밀번호 확인</span><span class="essential">*</span>
+    <form:input path="password2" type="password"/><br>
+    <form:errors cssClass="redChar" path="password2"/><br>
+
+    <span class="title">이메일</span>
+    <form:input path="email1" type="text"/>@
+    <form:select path="email2">
+        <form:option value=""> </form:option>
+        <form:option value="nate.com">nate.com</form:option>
+        <form:option value="naver.com">naver.com</form:option>
+        <form:option value="gmail.com">google.com</form:option>
+    </form:select><br>
+    <form:errors cssClass="redChar" path="email1"/><br>
+
+    <span class="title">우편번호</span>
+    <form:input path="postNumber" type="text"/><br>
+    <form:errors cssClass="redChar" path="postNumber"/><br>
+
+    <span class="title">주소</span>
+    <form:input path="address1" type="text"/><form:input path="address2" type="text"/><br>
+    <form:errors cssClass="redChar" path="address2"/><br>
+
+    <span class="title">핸드폰번호</span>
+    <form:input path="phone" type="text"/><br>
+    <form:errors cssClass="redChar" path="phone"/><br>
+
+    <span class="title">직업</span>
+    <form:select path="jobs" multiple="true" size="3">
+        <form:option value="student">학생</form:option>
+        <form:option value="programmer">컴퓨터/인터넷</form:option>
+        <form:option value="reproter">언론</form:option>
+    </form:select><br>
+    <form:errors cssClass="redChar" path="jobs"/><br>
+
+    <span class="title">메일/SMS 정보 수신</span>
+    <form:radiobutton path="agreeAdvertisement" value="true" id="accepted"/><label for="accepted">수신 </label>
+    <form:radiobutton path="agreeAdvertisement" value="false" id="unaccepted"/><label for="unaccepted">수신거부 </label><br>
+    <form:errors cssClass="redChar" path="agreeAdvertisement"/><br>
+    <button type="submit">회원가입</button> <button type="reset">취소</button>
+</form:form>
+</body>
+</html>
+
+            </xmp>
+            <h5 class="code-head">welcome.jsp</h5>
+            <xmp class="code-text">
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <style>
+        .title{
+            display: inline-block;
+            width: 180px;
+        }
+    </style>
+</head>
+<body>
+<h1>환영합니다 ${user.name}님!</h1>
+<form:form modelAttribute="user" method="post" action="signUpCheck">
+    <span class="title">이름</span><span class="essential">*</span>
+    <form:input path="name" type="text" disabled="true"/><br>
+
+    <span class="title">주민등록번호</span><span class="essential" disabled="true">*</span>
+    <form:input path="personalID1" type="text" disabled="true"/>-<form:input path="personalID2" type="text" disabled="true"/><br>
+
+    <span class="title">아이디</span><span class="essential">*</span>
+    <form:input path="ID" type="text" disabled="true"/><br>
+
+    <span class="title">비밀번호</span><span class="essential">*</span>
+    <form:input path="password1" type="password" disabled="true"/><br>
+
+    <span class="title">비밀번호 확인</span><span class="essential">*</span>
+    <form:input path="password2" type="password" disabled="true"/><br>
+
+    <span class="title">이메일</span>
+    <form:input path="email1" type="text" disabled="true"/>@
+    <form:select path="email2" disabled="true">
+        <form:option value=""> </form:option>
+        <form:option value="nate.com">nate.com</form:option>
+        <form:option value="naver.com">naver.com</form:option>
+        <form:option value="gmail.com">google.com</form:option>
+    </form:select><br>
+
+    <span class="title">우편번호</span>
+    <form:input path="postNumber" type="text" disabled="true"/><br>
+
+    <span class="title">주소</span>
+    <form:input path="address1" type="text" disabled="true"/><form:input path="address2" type="text" disabled="true"/><br>
+
+    <span class="title">핸드폰번호</span>
+    <form:input path="phone" type="text" disabled="true"/><br>
+
+    <span class="title">직업</span>
+    <form:select path="jobs" multiple="true" size="3" disabled="true">
+        <form:option value="student">학생</form:option>
+        <form:option value="programmer">컴퓨터/인터넷</form:option>
+        <form:option value="reproter">언론</form:option>
+    </form:select><br>
+
+    <span class="title">메일/SMS 정보 수신</span>
+    <form:radiobutton path="agreeAdvertisement" value="true" id="accepted" disabled="true"/><label for="accepted">수신 </label>
+    <form:radiobutton path="agreeAdvertisement" value="false" id="unaccepted" disabled="true"/><label for="unaccepted">수신거부 </label><br>
+    <button type="submit">회원가입</button> <button type="reset">취소</button>
+</form:form>
+</body>
+</html>
+
+            </xmp>
+            <h5 class="code-head">SpringController.java</h5>
+            <xmp class="code-text">
+package kr.bit.controller;
+
+import kr.bit.beans.*;
+import kr.bit.validator.UserValidator;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.PostMapping;
+
+import javax.validation.Valid;
+
+@Controller
+public class SpringController {
+    // 컨트롤러에 인터페이스 등록
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
+        UserValidator userValidator = new UserValidator();
+        binder.addValidators(userValidator);
+    }
+
+    @GetMapping("/signUp")
+    public String signUp(User user) {
+        return "signUp";
+    }
+
+    @PostMapping("/signUpCheck")
+    public String signUpCheck(@Valid User user, BindingResult result) {
+        if(result.hasErrors()) {
+            return "signUp";
+        }
+        return "welcome";
+    }
+
+}
+            </xmp>
+            <h5 class="code-head">userValidator.java</h5>
+            <xmp class="code-text">
+package kr.bit.validator;
+
+import kr.bit.beans.User;
+import org.springframework.validation.Errors;
+import org.springframework.validation.Validator;
+
+import java.util.List;
+
+public class UserValidator implements Validator {
+
+    @Override
+    public boolean supports(Class<?> clazz) {
+        return User.class.isAssignableFrom(clazz);
+    }
+
+    @Override
+    public void validate(Object target, Errors errors) {
+        User user = (User) target;
+
+        String personalID1 = user.getPersonalID1();
+        String personalID2 = user.getPersonalID2();
+
+        String password1 = user.getPassword1();
+        String password2 = user.getPassword2();
+
+        String phone = user.getPhone();
+
+        List<String> jobs = user.getJobs();
+
+        //주민번호 검증
+
+        if(personalID2.isEmpty()){
+            errors.rejectValue("personalID1", "personalID2.empty");
+        }
+
+        if(!personalID1.matches("[0-9]+")){
+            errors.rejectValue("personalID1", "personalID1.notNumber");
+        }
+
+        if(!personalID2.matches("[0-9]+")){
+            errors.rejectValue("personalID1", "personalID2.notNumber");
+        }
+
+        if(personalID1.length() != 6){
+            errors.rejectValue("personalID1", "personalID1.notLengthMatch");
+        }
+
+        if(personalID2.length() != 7){
+            errors.rejectValue("personalID1", "personalID2.notLengthMatch");
+        }
+
+        //비밀번호 검증
+        if(!password1.equals(password2)){
+            errors.rejectValue("password2", "password.notMatch");
+        }
+
+        // 핸드폰 번호 검증
+        int dashNumber = (int)phone.chars().filter(c -> c == '-').count();
+
+        if(dashNumber != 1){
+            errors.rejectValue("phone", "phone.invalidDashNum");
+        }
+
+        //직업 검증
+        if(jobs.isEmpty()){
+            errors.rejectValue("jobs", "jobs.empty");
+        }
+    }
+}
+
+            </xmp>
+            <h5 class="code-head">error.properties</h5>
+            <xmp class="code-text">
+NotEmpty.user.name=이름은 필수 입력 항목입니다.
+Pattern.user.name=이름은 한글만 입력 가능합니다.
+
+NotEmpty.user.personalID1=주민번호 앞자리는 필수 입력 항목입니다.
+personalID2.empty.user.personalID1=주민번호 뒷자리는 필수 입력 항목입니다.
+personalID1.notNumber.user.personalID1=주민번호 앞자리는 숫자만 입력 가능합니다.
+personalID2.notNumber.user.personalID1=주민번호 뒷자리는 숫자만 입력 가능합니다.
+personalID1.notLengthMatch.user.personalID1=주민번호 앞자리는 6자리입니다.
+personalID2.notLengthMatch.user.personalID1=주민번호 뒷자리는 7자리입니다.
+
+
+NotEmpty.user.ID=아이디는 필수 입력 항목입니다.
+Pattern.user.ID=아이디는 숫자 혹은 영어만 입력 가능합니다.
+Size.user.ID=아이디는 최소 네글자 이상 입력해야 합니다.
+
+NotEmpty.user.password1=비밀번호는 필수 입력 항목입니다.
+Pattern.user.password1=비밀번호는 영어와 숫자만 입력 가능합니다.
+
+password.notMatch.user.password2=비밀번호와 비밀번호 확인은 일치해야 합니다.
+
+NotEmpty.user.email1=이메일은 필수 입력 항목입니다.
+Pattern.user.email1=이메일은 영어와 숫자만 입력 가능합니다.
+Size.user.email1=이메일은 10글자 이내의 문자만 가능합니다.
+
+NotEmpty.user.postNumber=우편번호는 필수 입력 항목입니다.
+
+NotEmpty.user.address1=주소는 필수 입력 항목입니다.
+Pattern.user.address1=주소는 한글 혹은 숫자만 입력이 가능합니다.
+
+NotEmpty.user.address2=주소는 필수 입력 항목입니다.
+Pattern.user.address2=주소는 한글 혹은 숫자만 입력이 가능합니다.
+
+NotEmpty.user.phone=전화번호는 필수 입력 항목입니다.
+Pattern.user.phone=전화번호는 숫자와 '-'만 입력해야 합니다.
+phone.invalidDashNum.user.phone=전화번호에 '-'는 한번만 입력해야 합니다.
+
+jobs.empty.user.jobs=직업을 한 개 이상 선택하세요.
+
+NotNull.user.agreeAdvertisement=메일 정보 수신 동의 여부를 체크해 주세요.
+            </xmp>
+            <h5 class="code-head">ServletAppContext.java</h5>
+            <xmp class="code-text">
+@Bean(name = "messageSource")
+	public ReloadableResourceBundleMessageSource messageSource() {
+		ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+
+		//messageSource.setBasename(null);
+		messageSource.setBasename("/WEB-INF/properties/error");
+		//추가된 코드
+		messageSource.setDefaultEncoding("UTF-8");
+
+		return messageSource;
+	}
+            </xmp>
+        </div>
+    </div>
+</section>
+
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+</body>
+</html>
