@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../css/TIL_style.css">
+    <title>Title</title>
+</head>
+<body>
+<section class="ftco-section">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center mb-5">
+            <h2 class="heading-section">2024년 5월 1일 오전</h2>
+        </div>
+    </div>
+    <div class="remote">
+        <button onclick="goBack()" class="btn btn-primary">뒤로가기</button>
+    </div>
+    <div class="position-center">
+        <div class="code-area">
+            <h4 class="code-head">mybatis로 데이터베이스에 정보 저장 및 읽기</h4>
+            <h5 class="code-head">MapperInterface.java</h5>
+            <xmp class="code-text">
+package kr.bit.database;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Select;
+
+import kr.bit.beans.Data;
+
+public interface MapperInterface {
+
+	@Insert("insert into mvc_table(num1,num2,num3) values (#{num1},#{num2},#{num3})")
+	void insert_data(Data data);
+
+
+	@Select("select num1,num2,num3 from mvc_table")
+	List<Data> select_data();
+
+}
+            </xmp>
+            <h5 class="code-head">Data.java</h5>
+            <xmp class="code-text">
+package kr.bit.beans;
+
+public class Data {
+
+	private String num1;
+	private String num2;
+	private String num3;
+
+	public String getNum1() {
+		return num1;
+	}
+	public void setNum1(String num1) {
+		this.num1 = num1;
+	}
+	public String getNum2() {
+		return num2;
+	}
+	public void setNum2(String num2) {
+		this.num2 = num2;
+	}
+	public String getNum3() {
+		return num3;
+	}
+	public void setNum3(String num3) {
+		this.num3 = num3;
+	}
+}
+
+            </xmp>
+            <h5 class="code-head">ServletAppContext.java</h5>
+            <xmp class="code-text">
+package kr.bit.config;
+
+import org.apache.commons.dbcp2.BasicDataSource;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.mybatis.spring.SqlSessionFactoryBean;
+import org.mybatis.spring.mapper.MapperFactoryBean;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistration;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import kr.bit.database.MapperInterface;
+
+
+
+@Configuration
+@EnableWebMvc
+@ComponentScan("kr.bit.controller")
+@PropertySource("/WEB-INF/properties/db.properties")
+public class ServletAppContext implements WebMvcConfigurer {
+
+
+	@Value("${db.classname}")
+	private String db_classname;
+
+	@Value("${db.url}")
+	private String db_url;
+
+	@Value("${db.username}")
+	private String db_username;
+
+	@Value("${db.password}")
+	private String db_password;
+
+	@Override
+	public void configureViewResolvers(ViewResolverRegistry registry) {
+		WebMvcConfigurer.super.configureViewResolvers(registry);
+		registry.jsp("/WEB-INF/views/", ".jsp");
+	}
+
+	@Override
+	public void addResourceHandlers(ResourceHandlerRegistry registry) {
+		WebMvcConfigurer.super.addResourceHandlers(registry);
+		registry.addResourceHandler("/**").addResourceLocations("/resources/");
+	}
+
+	@Bean
+	public BasicDataSource dataSource() {
+		BasicDataSource source= new BasicDataSource();
+		source.setDriverClassName(db_classname);
+		source.setUrl(db_url);
+		source.setUsername(db_username);
+		source.setPassword(db_password);
+
+		return source;
+	}
+
+	@Bean
+	public SqlSessionFactory factory(BasicDataSource source) throws Exception{
+
+		SqlSessionFactoryBean fac=new SqlSessionFactoryBean();
+		fac.setDataSource(source);
+		SqlSessionFactory factory=fac.getObject();
+		return factory;
+	}
+
+	@Bean
+	public MapperFactoryBean<MapperInterface> test_mapper(SqlSessionFactory factory) throws Exception{
+
+		MapperFactoryBean<MapperInterface> fac =
+				new MapperFactoryBean<MapperInterface>(MapperInterface.class);
+
+		fac.setSqlSessionFactory(factory);
+		return fac;
+
+	}
+
+	/*@Bean(name = "messageSource")
+	public ReloadableResourceBundleMessageSource messageSource() {
+		ReloadableResourceBundleMessageSource res = new ReloadableResourceBundleMessageSource();
+		res.setBasename("/WEB-INF/properties/error");
+		return res;
+	}*/
+}
+            </xmp>
+            <h5 class="code-head">SpringController.java</h5>
+            <xmp class="code-text">
+package kr.bit.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+
+import kr.bit.beans.Data;
+import kr.bit.database.MapperInterface;
+
+@Controller
+public class SpringController {
+
+	@Autowired
+	MapperInterface mapper;
+
+	@GetMapping("/input_test")
+	public String input_test() {
+		return "input_test";
+	}
+
+	@PostMapping("/input_proc")
+	public String input_proc(Data data) {
+		mapper.insert_data(data);  //db에 저장
+		return "input_proc";
+	}
+
+	@GetMapping("/read_test")
+	public String read_test(Model model) {
+		List<Data> li=mapper.select_data();
+		model.addAttribute("li",li);
+		return "read_test";
+
+	}
+}
+            </xmp>
+            <h5 class="code-head">db.properties</h5>
+            <xmp class="code-text">
+db.classname=com.mysql.cj.jdbc.Driver
+db.url=jdbc:mysql://localhost:3306/test
+db.username=root
+db.password=1030
+            </xmp>
+            <h5 class="code-head">read_test.jsp</h5>
+            <xmp class="code-text">
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+	<c:forEach var="obj" items="${li }">
+		${obj.num1 }<br>
+		${obj.num2 }<br>
+		${obj.num3 }
+	</c:forEach>
+
+</body>
+</html>
+            </xmp>
+        </div>
+    </div>
+</section>
+
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+</body>
+</html>
