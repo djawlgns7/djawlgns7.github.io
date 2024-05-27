@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../css/TIL_style.css">
+    <title>Title</title>
+</head>
+<body>
+<section class="ftco-section">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center mb-5">
+            <h2 class="heading-section">2024년 5월 27일 오전</h2>
+        </div>
+    </div>
+    <div class="remote">
+        <button onclick="goBack()" class="btn btn-primary">뒤로가기</button>
+    </div>
+    <div class="position-center">
+        <div class="code-area">
+            <h4 class="code-head">ResultMap을 활용한 xml파일 예시</h4>
+            <xmp class="code-text">
+<select id="getMember" resultMap="memberMap">
+    select * from member_security mem left outer join member_auth auth
+    on mem.member_id = auth.member_id
+    where mem.member_id = #{member_id}
+</select>
+<resultMap id="memberMap" type="kr.bit.entity.Member">
+    <id property="member_idx" column="member_idx"/>
+    <result property="member_id" column="member_id"/>
+    <result property="member_password" column="member_password"/>
+    <result property="member_name" column="member_name"/>
+    <result property="member_age" column="member_age"/>
+    <result property="member_gender" column="member_gender"/>
+    <result property="member_email" column="member_email"/>
+    <result property="member_profile" column="member_profile"/>
+    <collection property="authList" resultMap="authMap"/>
+</resultMap>
+
+<resultMap id="authMap" type="kr.bit.entity.MemberAuth">
+    <id property="number" column="number"/>
+    <result property="member_id" column="member_id"/>
+    <result property="auth" column="auth"/>
+</resultMap>
+            </xmp>
+        </div>
+    </div>
+</section>
+
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+</body>
+</html>

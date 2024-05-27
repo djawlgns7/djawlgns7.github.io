@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../css/TIL_style.css">
+    <title>Title</title>
+</head>
+<body>
+<section class="ftco-section">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center mb-5">
+            <h2 class="heading-section">2024년 5월 27일 오후</h2>
+        </div>
+    </div>
+    <div class="remote">
+        <button onclick="goBack()" class="btn btn-primary">뒤로가기</button>
+    </div>
+    <div class="position-center">
+        <div class="code-area">
+            <h4 class="code-head">로그인 과정에 보안 추가하기</h4>
+            <h5 class="code-head">SecurityConfig.java에 설정 추가</h5>
+            <xmp class="code-text">
+@Override
+protected void configure(HttpSecurity security) throws Exception {
+    //mvc와 시큐리티 결합해서 필요한 환경을 이 클래스에서 설정
+    //요청에 대한 보안 -> 한글깨짐 방지
+    CharacterEncodingFilter encodingFilter = new CharacterEncodingFilter();
+    encodingFilter.setEncoding("UTF-8");
+    encodingFilter.setForceEncoding(true);
+    security.addFilterBefore(encodingFilter, CsrfFilter.class);
+
+    // 요청에 따른 권한을 확인하여 서비스하는 부분
+    security.authorizeRequests().antMatchers("/").permitAll()   // 설정한 리소스 접근을 인증절차 없이 허용
+            .and()
+            .formLogin().loginPage("/memberLogin")    // 사용자가 만든 로그인페이지를 사용하려할 때 설정
+            .loginProcessingUrl("/memberLoginProc").permitAll()   // 이 url이 왔을 때 스프링 시큐리티 로그인으로 넘어감(인증처리필터)
+            .and().
+            logout().invalidateHttpSession(true).logoutSuccessUrl("/")  // 로그아웃 후 세션 제거 및 이동
+            .and().exceptionHandling().accessDeniedPage("/access-denied");   // 오류 발생 시 오류페이지로 이동
+}
+            </xmp>
+            <h5 class="code-head">MemberUserDetailsService</h5>
+            <xmp class="code-text">
+package kr.bit.security;
+
+import kr.bit.entity.Member;
+import kr.bit.entity.MemberUser;
+import kr.bit.mapper.MemberMapper;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+
+// DB로부터 유저정보를 가져옴
+@Data
+@Service
+public class MemberUserDetailsService implements UserDetailsService {
+
+    @Autowired
+    private MemberMapper memberMapper;
+
+    @Override   // id를 기준으로 id, pw, auth 리턴받기
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Member member = memberMapper.getMember(username);
+
+        if(member != null) {
+            return new MemberUser(member);
+        }else {
+            throw new UsernameNotFoundException(username + "이 존재하지 않는다");
+        }
+    }
+}
+
+            </xmp>
+            <h5 class="code-head">MemberUser</h5>
+            <xmp class="code-text">
+package kr.bit.entity;
+
+import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+
+import java.util.Collection;
+import java.util.stream.Collectors;
+
+@Getter
+@Setter
+@ToString
+public class MemberUser extends User {
+    private Member member;
+
+    public MemberUser(String name, String password, Collection<? extends GrantedAuthority> authorities) {
+        super(name, password, authorities);
+    }
+
+    public MemberUser(Member member) {
+        // 시큐리티에서 제공하는 세가지 정보 저장
+        super(member.getMember_id(), member.getMember_password(), member.getAuthList().stream().map(
+                auth -> new SimpleGrantedAuthority(auth.getAuth())).collect(Collectors.toList()));
+        // 시큐리티에서 제공하지 않는 정보 저장
+        this.member = member;
+    }
+}
+
+            </xmp>
+            <h5 class="code-head">로그인 실패 메시지 띄우기</h5>
+            <xmp class="code-text">
+// login.jsp의 일부
+$(document).ready(function () {
+    if(${param.error != null}) {
+        $("#msgType").attr("class", "modal-content panel-warning");
+        $(".modal-header").text("실패");
+        $(".modal-body").text("아이디 혹은 비밀번호를 확인해주세요");
+        $("#failModal").modal("show");
+    }
+
+    if (${!empty message1}) {
+        $("#msgType").attr("class", "modal-content panel-warning");
+        $("#failModal").modal("show");
+    }
+});
+            </xmp>
+        </div>
+    </div>
+</section>
+
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+</body>
+</html>
