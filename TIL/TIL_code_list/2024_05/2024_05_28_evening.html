@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../css/TIL_style.css">
+    <title>Title</title>
+</head>
+<body>
+<section class="ftco-section">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center mb-5">
+            <h2 class="heading-section">2024년 5월 28일 저녁</h2>
+        </div>
+    </div>
+    <div class="remote">
+        <button onclick="goBack()" class="btn btn-primary">뒤로가기</button>
+    </div>
+    <div class="position-center">
+        <div class="code-area">
+            <h4 class="code-head">컨트롤러</h4>
+            <h5 class="code-head">Home</h5>
+            <xmp class="code-text">
+package kr.bit.controller;
+
+import kr.bit.service.SugangService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+
+@Controller
+@RequiredArgsConstructor
+public class HomeController {
+    private final SugangService sugangService;
+
+    @GetMapping("/")
+    public String main(Model model) {
+        model.addAttribute("subjects", sugangService.getSugangList());
+
+        return "main";
+    }
+}
+
+            </xmp>
+            <h5 class="code-head">Member</h5>
+            <xmp class="code-text">
+package kr.bit.controller;
+
+import kr.bit.beans.Member;
+import kr.bit.service.MemberService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpSession;
+
+@Controller
+@RequiredArgsConstructor
+public class MemberController {
+    private final MemberService memberService;
+
+    @GetMapping("/join")
+    public String join() {
+        return "member/join";
+    }
+
+    @GetMapping("/idCheck")
+    @ResponseBody
+    public boolean idCheck(@RequestParam String member_id){
+        return memberService.getMemberById(member_id) == null;
+    }
+
+    @PostMapping("/join_proc")
+    public String joinProc(@ModelAttribute Member member){
+        int result = memberService.insertMember(member);
+
+        if(result == 1){
+            return "redirect:/";
+        }else {
+            return "redirect:/join";
+        }
+    }
+
+    @GetMapping("/loginCheck")
+    @ResponseBody
+    public boolean login(@RequestParam String login_id, @RequestParam String login_password){
+        Member member = new Member();
+        member.setMember_id(login_id);
+        member.setMember_password(login_password);
+
+        return memberService.memberLogin(member);
+    }
+
+    @GetMapping("/loginSuccess")
+    public String loginSuccess(HttpSession session, @RequestParam String loginId){
+        Member member = memberService.getMemberById(loginId);
+
+        session.setAttribute("loginMember", member);
+
+        return "redirect:/";
+    }
+
+    @GetMapping("/logout")
+    public String logout(HttpSession session){
+        session.removeAttribute("loginMember");
+        return "redirect:/";
+    }
+}
+
+            </xmp>
+        </div>
+    </div>
+</section>
+
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+</body>
+</html>

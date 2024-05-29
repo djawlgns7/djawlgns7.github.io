@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../css/TIL_style.css">
+    <title>Title</title>
+</head>
+<body>
+<section class="ftco-section">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center mb-5">
+            <h2 class="heading-section">2024년 5월 28일 오전</h2>
+        </div>
+    </div>
+    <div class="remote">
+        <button onclick="goBack()" class="btn btn-primary">뒤로가기</button>
+    </div>
+    <div class="position-center">
+        <div class="code-area">
+            <h4 class="code-head">회원가입</h4>
+            <h5 class="code-head">컨트롤러</h5>
+            <xmp class="code-text">
+@PostMapping("/memberRegister")
+public String memberRegister(Member member, RedirectAttributes redirectAttributes) {
+    if (member.getAuthList().isEmpty()) {
+        redirectAttributes.addFlashAttribute("message1", "실패");
+        redirectAttributes.addFlashAttribute("message2", "권한을 설정하세요");
+
+        return "redirect:memberJoin/";
+    }
+
+    member.setMember_profile("");
+
+    String encodedPassword = passwordEncoder.encode(member.getMember_password());
+    member.setMember_password(encodedPassword);
+
+    int result = memberMapper.register(member);
+
+    if (result == 1) { // 1행 추가됨-> insert 성공 되면
+        int authResult = 0;
+        List<MemberAuth> list = member.getAuthList();
+        for (MemberAuth auth : list) {
+            if (auth.getAuth() != null) {
+                MemberAuth memberAuth = new MemberAuth();
+                memberAuth.setMember_id(member.getMember_id());
+                memberAuth.setAuth(auth.getAuth());
+                authResult = memberMapper.insertAuth(memberAuth);
+            }
+        }
+
+        if (authResult == 1) {
+            redirectAttributes.addFlashAttribute("message1", "성공");
+            redirectAttributes.addFlashAttribute("message2", "회원가입에 성공했습니다");
+
+            return "redirect:/";
+        } else {
+            redirectAttributes.addFlashAttribute("msg1", "실패");
+            redirectAttributes.addFlashAttribute("msg2", "권한 설정에 실패했습니다");
+
+            return "redirect:memberJoin/";
+        }
+    } else {
+        redirectAttributes.addFlashAttribute("msg1", "실패");
+        redirectAttributes.addFlashAttribute("msg2", "회원가입에 실패했습니다");
+
+        return "redirect:memberJoin/";
+    }
+}
+            </xmp>
+            <h4 class="code-head">회원정보 수정</h4>
+            <h5 class="code-head">컨트롤러</h5>
+            <xmp class="code-text">
+@PostMapping("/memberUpdateProc")
+public String memberUpdateProc(Member member, RedirectAttributes redirectAttributes, HttpSession session, @RequestParam String member_id) {
+    if (member.getMember_name().isEmpty() || member.getMember_gender().isEmpty() || member.getMember_email().isEmpty()) {
+
+        redirectAttributes.addFlashAttribute("msg1", "실패");
+        redirectAttributes.addFlashAttribute("msg2", "모든 값을 입력해주세요");
+
+        return "redirect:/memberUpdateForm";
+    }
+
+    String encodedPassword = passwordEncoder.encode(member.getMember_password());
+    member.setMember_password(encodedPassword);
+
+    int result = memberMapper.updateMember(member);
+
+    if (result == 0) {
+        redirectAttributes.addFlashAttribute("msg1", "실패");
+        redirectAttributes.addFlashAttribute("msg2", "업데이트를 실패했습니다");
+
+        return "redirect:/memberUpdateForm";
+    } else {
+        int authResult = 0;
+        memberMapper.clearAuth(member.getMember_id());
+
+        List<MemberAuth> list = member.getAuthList();
+        for (MemberAuth auth : list) {
+            if (auth.getAuth() != null) {
+                MemberAuth memberAuth = new MemberAuth();
+                memberAuth.setMember_id(member_id);
+                memberAuth.setAuth(auth.getAuth());
+                authResult = memberMapper.insertAuth(memberAuth);
+            }
+        }
+
+        if (authResult == 0) {
+            redirectAttributes.addFlashAttribute("msg1", "실패");
+            redirectAttributes.addFlashAttribute("msg2", "권한 설정에 실패했습니다");
+
+            return "redirect:/memberUpdateForm";
+        } else {
+            redirectAttributes.addFlashAttribute("message1", "성공");
+            redirectAttributes.addFlashAttribute("message2", "정보가 업데이트 되었습니다");
+
+            // 회원 정보 수정 시 세션 재설정
+            // SecurityContext에 들어있음
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            // principal: "누구"에 해당하는 정보 -> 객체타입은 UserDetails: pw, id, auth
+            MemberUser memberUser = (MemberUser) authentication.getPrincipal();
+            SecurityContextHolder.getContext().setAuthentication(createAuth(authentication, memberUser.getMember().getMember_id()));
+
+            return "redirect:/";
+        }
+    }
+}
+            </xmp>
+        </div>
+    </div>
+</section>
+
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+</body>
+</html>
