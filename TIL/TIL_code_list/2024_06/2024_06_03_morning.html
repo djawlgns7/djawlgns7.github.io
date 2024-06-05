@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../css/TIL_style.css">
+    <title>Title</title>
+</head>
+<body>
+<section class="ftco-section">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center mb-5">
+            <h2 class="heading-section">2024년 6월 3일 오전</h2>
+        </div>
+    </div>
+    <div class="remote">
+        <button onclick="goBack()" class="btn btn-primary">뒤로가기</button>
+    </div>
+    <div class="position-center">
+        <div class="code-area">
+            <h4 class="code-head">리액트 샘플코드</h4>
+            <h5 class="code-head">calculator.jsx</h5>
+            <xmp class="code-text">
+function add(a, b) {
+    return a + b;
+}
+
+function multiply(a, b) {
+    return a + b;
+}
+
+function divide(a, b) {
+    return a + b;
+}
+
+export{
+    add,
+    multiply,
+    divide
+}
+
+export default function sub(a, b) {
+    return a - b;
+}
+            </xmp>
+            <h5 class="code-head">index.jsx</h5>
+            <xmp class="code-text">
+// index.js
+import {add, divide, multiply} from "./calculator.js";
+import sub from "./calculator.js";
+// import sub, {add, divide, multiply} from "./calculator.js";
+
+console.log(add(1,2));
+console.log(multiply(2, 8));
+console.log(divide(28, 7));
+console.log(sub(51, 5));
+            </xmp>
+            <h4 class="code-head">사용자 정의 태그 연습</h4>
+            <h5 class="code-head">Header.jsx</h5>
+            <xmp class="code-text">
+function Header() {
+    return (
+        <>
+            <h1>여기는 헤더 공간</h1>
+        </>
+    )
+}
+
+export default Header
+            </xmp>
+            <h5 class="code-head">Footer.jsx</h5>
+            <xmp class="code-text">
+function Footer() {
+    return (
+        <>
+            <h1>여기는 푸터 공간</h1>
+        </>
+    )
+}
+
+export default Footer
+            </xmp>
+            <h5 class="code-head">App.jsx</h5>
+            <xmp class="code-text">
+import Header from "./components/Header.jsx"
+import Footer from "./components/Footer.jsx"
+
+function App() {    // App 컴포넌트
+
+    return (
+        <>
+            <Header></Header>
+            <h1>안녕 리엑트</h1>
+            <Footer></Footer>
+        </>
+    )
+}
+
+export default App
+            </xmp>
+        </div>
+    </div>
+</section>
+
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+</body>
+</html>

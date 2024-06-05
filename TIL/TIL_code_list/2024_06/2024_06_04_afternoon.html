@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../css/TIL_style.css">
+    <title>Title</title>
+</head>
+<body>
+<section class="ftco-section">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center mb-5">
+            <h2 class="heading-section">2024년 6월 4일 오후</h2>
+        </div>
+    </div>
+    <div class="remote">
+        <button onclick="goBack()" class="btn btn-primary">뒤로가기</button>
+    </div>
+    <div class="position-center">
+        <div class="code-area">
+            <h4 class="code-head">요구사항 정의</h4>
+            <h5 class="code-head">회원(호스트)</h5>
+            <xmp class="code-text">
+- 회원가입 및 로그인 할 수 있다
+- 카테고리를 선택해서 다양한 놀이 방을 만들 수 있다
+- 이 때 최대 참여 인원, 제한 시간, 라운드 수 등을 정할 수 있다
+- qr코드 혹은 url을 생성하여 참여자를 방에 초대할 수 있다
+            </xmp>
+            <h5 class="code-head">비회원(참여자)</h5>
+            <xmp class="code-text">
+- qr코드 혹은 url을 통해 호스트가 만든 방에 입장이 가능하다(핸드폰 이용)
+- 퀴즈가 시작되면 화면에 표시된 문제를 보고 제한 시간 이내에 정답을 맞춰야 된다
+- 모든 라운드가 끝날 경우 정답을 맞춘 횟수에 따라 순위를 매겨서 결과를 표시해 준다
+            </xmp>
+            <h5 class="code-head">퀴즈</h5>
+            <xmp class="code-text">
+- 여러 가지 카테고리(상식, 국기 맞추기, 프로그래밍 관련 등)가 존재한다
+- 퀴즈의 경우 글, 사진, 음악, 동영상 등을 이용 가능하다
+- 회원의 경우 사용자 정의 퀴즈를 만들어서 플레이 가능하다
+            </xmp>
+            <h5 class="code-head">노래 비슷하게 부르기(음성)</h5>
+            <xmp class="code-text">
+- 두 팀으로 나뉘어서 각자 팀은 샘플로 나온 노래와 최대한 비슷하게 노래를 부른다
+- 노래가 나오다가 한소절 부르기
+- teachable machine의 음성 인식 기능을 활용하여 최대 유사도를 측정하여 점수를 매긴다
+            </xmp>
+            <h5 class="code-head">가사 맞추기 게임</h5>
+            <xmp class="code-text">
+- 특정 노래를 듣고 다음 가사를 맞추는 게임
+- 힌트 제공으로 인한 가사 맞추기
+- 노래 주제(카테고리), 대중성 노래 난이도(쉬움, 보통, 어려움)
+            </xmp>
+            <h5 class="code-head">주어진 포즈 따라하기⭐️</h5>
+            <xmp class="code-text">
+- 여러 팀으로 나뉘어서 제한 시간 이내에 주어진 포즈를 여러 명이서 따라한다
+- teachable machine의 모션 인식 기능을 활용하여 유사도를 측정하여 점수를 매긴다
+            </xmp>
+        </div>
+    </div>
+</section>
+
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+</body>
+</html>

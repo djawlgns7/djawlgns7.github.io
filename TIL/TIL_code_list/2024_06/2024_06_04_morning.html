@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../css/TIL_style.css">
+    <title>Title</title>
+</head>
+<body>
+<section class="ftco-section">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center mb-5">
+            <h2 class="heading-section">2024년 6월 4일 오전</h2>
+        </div>
+    </div>
+    <div class="remote">
+        <button onclick="goBack()" class="btn btn-primary">뒤로가기</button>
+    </div>
+    <div class="position-center">
+        <div class="code-area">
+            <h4 class="code-head">prop</h4>
+            <h5 class="code-head">버튼을 누르면 버튼의 글자가 알림으로 출력되는 코드</h5>
+            <xmp class="code-text">
+const Button = (props) =>{
+    const onClickButton = () => {
+        alert(props.title);
+    }
+    return(
+        <button onClick={onClickButton}
+        style={{color:props.color}}>{props.title}</button>
+    )
+};
+
+// default 값: props에 전달을 받지 못해도 적용됨
+Button.defaultProps = {
+    color: "pink",
+}
+
+export default Button;
+            </xmp>
+            <h4 class="code-head">state</h4>
+            <h5 class="code-head">이름과 이메일을 입력할 경우 입력 칸 밑에 입력한 내용을 출력해주는 코드</h5>
+            <xmp class="code-text">
+import {useState} from "react";
+
+const Join2 = () => {
+    const [input, setInput] = useState({
+        name: "",
+        email: ""
+    });
+
+    const onChangeName = (e) => {
+        setInput({
+            ...input,
+            name: e.target.value,
+        });
+    }
+
+    const onChangeEmail = (e) => {
+        setInput({
+            ...input,
+            email: e.target.value,
+        });
+    }
+
+    return (
+        <div>
+            <div>
+                <input onChange={onChangeName} placeholder={"이름써라"} value={input.name}/>
+                <div/>
+                {input.name}
+            </div>
+
+            <div>
+                <input type={"email"} onChange={onChangeEmail} placeholder={"이메일써라"} value={input.email}/>
+                <div/>
+                {input.email}
+            </div>
+        </div>
+    );
+}
+
+export default Join2;
+            </xmp>
+        </div>
+    </div>
+</section>
+
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+</body>
+</html>
