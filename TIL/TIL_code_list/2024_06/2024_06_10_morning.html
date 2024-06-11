@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../css/TIL_style.css">
+    <title>Title</title>
+</head>
+<body>
+<section class="ftco-section">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center mb-5">
+            <h2 class="heading-section">2024년 6월 10일 오전</h2>
+        </div>
+    </div>
+    <div class="remote">
+        <button onclick="goBack()" class="btn btn-primary">뒤로가기</button>
+    </div>
+    <div class="position-center">
+        <div class="code-area">
+            <h4 class="code-head">ToDo 리스트</h4>
+            <h5 class="code-head">App.jsx</h5>
+            <xmp class="code-text">
+import './App.css';
+import Header from "./components/Header.jsx";
+import List from "./components/List.jsx";
+import Register from "./components/Register.jsx";
+import {useRef, useState} from "react";
+
+const copyData = [
+    {
+        id: 0,
+        isDo: false,
+        content: "스프링 공부하기",
+        date: new Date().getTime(),
+    },
+    {
+        id: 1,
+        isDo: false,
+        content: "프로젝트 스터디 하기",
+        date: new Date().getTime(),
+    },
+    {
+        id: 2,
+        isDo: false,
+        content: "헬스하기",
+        date: new Date().getTime(),
+    },
+]
+
+function App() {
+    const [todos, setTodos] = useState([...copyData]);
+
+    const idState = useRef(3);
+
+    // 체크박스
+    const onUpdate = (targetId) => {
+        //todos state값들 중에 target와 일치하는 id를 갖는 item의 isDo를 변경
+        setTodos(
+            todos.map((todo) => {
+                return todo.id === targetId ? {...todo, isDo: !todo.isDo} : todo
+                // 같은 id값이 있으면 기존 todo객체의 isDo를 not으로
+                // 같지 않으면 기존 todo를 돌려받음
+        })
+        );
+    }
+
+    const onCreate = (content) => {
+        const newTodo = {
+            id: idState.current++,
+            isDo: false,
+            content: content,
+            date: new Date().getTime(),
+        };
+
+        setTodos([newTodo, ...todos]);
+    };
+
+    const onDelete = (targetId) => {
+        // todos 배열에서 targetId와 일치하지 않는 id를 가진 요소만 저장시킴
+        setTodos(todos.filter((todo) => todo.id !== targetId));
+    }
+
+    return (
+        <>
+            <div className={"App"}>
+                <Header/>
+                <Register onCreate={onCreate} />
+                <List todos={todos} onUpdate={onUpdate} onDelete={onDelete}/>
+            </div>
+        </>
+    )
+}
+
+export default App
+
+            </xmp>
+            <h5 class="code-head">Header.jsx</h5>
+            <xmp class="code-text">
+import "./Header.css";
+
+const Header = () => {
+    return (
+        <>
+            <div className="Header">
+                <h3>오늘은</h3>
+                <h1>{new Date().toDateString()}</h1>
+            </div>
+        </>
+    )
+}
+
+export default Header
+            </xmp>
+            <h5 class="code-head">Register.jsx</h5>
+            <xmp class="code-text">
+import "./Register.css"
+import {useRef, useState} from "react";
+
+const Register = (props) => {
+
+    const [content, setContent] = useState("");
+
+    const inputRef = useRef();
+
+    const onKeydown = (e) => {
+        if(e.keyCode === 13) {
+            onSubmit();
+        }
+    }
+
+    const onContent = (e) => {
+        setContent(e.target.value);
+    }
+
+    const onSubmit = () => {
+        if(content === ""){
+            inputRef.current.focus();
+            return;
+        }
+
+        props.onCreate(content);
+        setContent("");
+    }
+    return (
+        <>
+            <div className={"Register"}>
+                <input value={content} ref={inputRef} onChange={onContent} onKeyDown={onKeydown} type={"text"} placeholder={"할 일"}/>
+                <button onClick={onSubmit}>추가</button>
+            </div>
+        </>
+    )
+}
+
+export default Register
+            </xmp>
+            <h5 class="code-head">List.jsx</h5>
+            <xmp class="code-text">
+import "./List.css"
+import Item from "./Item.jsx";
+import {useState} from "react";
+
+const List = (props) => {
+    const [search, setSearch] = useState("");
+
+    const onSearch = (e) => {
+        setSearch(e.target.value);
+    }
+
+    const filterData = () => {
+        if(search === ""){
+            return props.todos;
+        }
+
+        return props.todos.filter((todo) =>
+            todo.content.toLowerCase().includes(search.toLowerCase())
+        );
+    }
+
+    return (
+        <>
+            <div className={"List"}>
+                <h4>To do List</h4>
+                <input onChange={onSearch} placeholder={"검색어를 입력하세요"}/>
+                <div className={"li"}>
+                    {
+                        filterData().map((todo) => {
+                            // eslint-disable-next-line react/jsx-key
+                            return <Item {...todo} onUpdate={props.onUpdate} onDelete={props.onDelete} />;
+                        })
+                    }
+                </div>
+            </div>
+        </>
+    )
+}
+
+export default List
+            </xmp>
+            <h5 class="code-head">Item.jsx</h5>
+            <xmp class="code-text">
+import "./Item.css";
+
+const Item = (props) => {
+
+    const onCheckbox = () => {
+        props.onUpdate(props.id);
+    }
+
+    const onDelete = () => {
+        props.onDelete(props.id);
+    }
+
+    return (
+        <>
+            <div className="todoItem">
+                <input onChange={onCheckbox} type={"checkbox"} readOnly checked={props.isDo}/>
+                <div className={"content"}>{props.content}</div>
+                <div className={"date"}>{props.date}</div>
+                <button onClick={onDelete}>삭제</button>
+            </div>
+        </>
+    );
+}
+
+export default Item;
+            </xmp>
+        </div>
+    </div>
+</section>
+
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+</body>
+</html>

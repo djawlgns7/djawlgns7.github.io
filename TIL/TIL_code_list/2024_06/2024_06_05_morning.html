@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../css/TIL_style.css">
+    <title>Title</title>
+</head>
+<body>
+<section class="ftco-section">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center mb-5">
+            <h2 class="heading-section">2024년 6월 5일 오전</h2>
+        </div>
+    </div>
+    <div class="remote">
+        <button onclick="goBack()" class="btn btn-primary">뒤로가기</button>
+    </div>
+    <div class="position-center">
+        <div class="code-area">
+            <h4 class="code-head">useRef</h4>
+            <h5 class="code-head">useRef를 DOM처럼 이용해보기</h5>
+            <xmp class="code-text">
+import {useRef, useState} from "react";
+
+const Join2 = () => {
+    const [input, setInput] = useState({
+        name: "",
+        email: "",
+        language: "",
+        memo: "",
+    });
+
+    const ref = useRef(0);
+    const nameInputRef = useRef();
+    const emailInputRef = useRef();
+    console.log(ref);
+
+    const onChangeName = (e) => {
+        setInput({
+            ...input,
+            name: e.target.value,
+        });
+    }
+
+    const onChangeEmail = (e) => {
+        setInput({
+            ...input,
+            email: e.target.value,
+        });
+    }
+
+    const onSubmit = () => {
+        if(input.name === ""){
+            nameInputRef.current.focus();   //이름 요소 입력하는 창에 DOM요소를 포커스를 주고 있음
+        } else if(input.email === ""){
+            emailInputRef.current.focus();
+        }
+    }
+
+    return (
+        <div>
+            <div>
+                <button onClick={() => {
+                    ref.current++;
+                    console.log(ref.current);
+                }}>
+                    1씩 더하기
+                </button>
+                ref: {ref.current}
+            </div>
+            <div>
+                <input ref={nameInputRef} onChange={onChangeName} placeholder={"이름써라"} value={input.name}/>
+                <div/>
+                이름: {input.name}
+            </div>
+
+            <div>
+                <input type={"email"} ref={emailInputRef} onChange={onChangeEmail} placeholder={"이메일써라"} value={input.email}/>
+                <div/>
+                이메일: {input.email}
+            </div>
+            <button type={"submit"} onClick={onSubmit}>제출하기</button>
+        </div>
+    );
+}
+
+export default Join2;
+            </xmp>
+            <h4 class="code-head">React Hooks</h4>
+            <h5 class="code-head">hook 연습해보기</h5>
+            <xmp class="code-text">
+import {useState} from "react";
+
+function useInput() {
+    const [input, setInput] = useState("input: ");
+
+    const onChange = (e) => {
+        setInput("input: " + e.target.value);
+    }
+    return [input, onChange];
+}
+
+const Test = () => {
+    const [input, onChange] = useInput();
+    return (
+        <>
+            <div>
+                <input onChange={onChange}/>
+                {input}
+            </div>
+        </>
+    )
+}
+
+export default Test;
+            </xmp>
+        </div>
+    </div>
+</section>
+
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+</body>
+</html>

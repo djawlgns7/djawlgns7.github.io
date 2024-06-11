@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../css/TIL_style.css">
+    <title>Title</title>
+</head>
+<body>
+<section class="ftco-section">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center mb-5">
+            <h2 class="heading-section">2024년 6월 7일 오후</h2>
+        </div>
+    </div>
+    <div class="remote">
+        <button onclick="goBack()" class="btn btn-primary">뒤로가기</button>
+    </div>
+    <div class="position-center">
+        <div class="code-area">
+            <h4 class="code-head">웹 소캣을 이용한 다인 채팅 시스템</h4>
+            <h5 class="code-head">WebSocketConfig.java</h5>
+            <xmp class="code-text">
+package kr.bit.config;
+
+import kr.bit.handler.ChatWebSocketHandler;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.socket.config.annotation.EnableWebSocket;
+import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
+import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
+
+@Configuration
+@EnableWebSocket
+public class WebSocketConfig implements WebSocketConfigurer {
+
+    @Override
+    public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+        registry.addHandler(chatWebSocketHandler(), "/chat").setAllowedOrigins("*");
+    }
+
+    @Bean
+    public ChatWebSocketHandler chatWebSocketHandler() {
+        return new ChatWebSocketHandler();
+    }
+}
+
+            </xmp>
+            <h5 class="code-head">ChatWebSocketHandler.java</h5>
+            <xmp class="code-text">
+package kr.bit.handler;
+
+import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.handler.TextWebSocketHandler;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class ChatWebSocketHandler extends TextWebSocketHandler {
+
+    private final List<WebSocketSession> sessions = new ArrayList<>();
+
+    @Override
+    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+        System.out.println("Connection Established: " + session);
+        sessions.add(session);
+    }
+
+    @Override
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+        System.out.println("Message Received: " + message.getPayload());
+        for (WebSocketSession s : sessions) {
+            s.sendMessage(message);
+        }
+    }
+
+    @Override
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+        System.out.println("Connection Closed: " + session);
+        sessions.remove(session);
+    }
+}
+
+            </xmp>
+            <h5 class="code-head">main.jsp</h5>
+            <xmp class="code-text">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat Application</title>
+</head>
+<body>
+    <h1>Chat Application</h1>
+    <div id="chat">
+        <input type="text" id="message" placeholder="Enter message...">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+    <div id="chat-box"></div>
+
+    <script type="text/javascript">
+        var socket = new WebSocket("ws://localhost:8080/chat");
+
+        socket.onopen = function(event) {
+            console.log("Connected to WebSocket server.");
+        };
+
+        socket.onmessage = function(event) {
+            var chatBox = document.getElementById("chat-box");
+            var message = document.createElement("div");
+            message.textContent = event.data;
+            chatBox.appendChild(message);
+        };
+
+        socket.onclose = function(event) {
+            console.log("Disconnected from WebSocket server.");
+        };
+
+        socket.onerror = function(event) {
+            console.error("WebSocket error observed:", event);
+        };
+
+        function sendMessage() {
+            var messageInput = document.getElementById("message");
+            var message = messageInput.value;
+            socket.send(message);
+            messageInput.value = "";
+        }
+    </script>
+</body>
+</html>
+
+            </xmp>
+        </div>
+    </div>
+</section>
+
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+</body>
+</html>
