@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../css/TIL_style.css">
+    <title>Title</title>
+</head>
+<body>
+<section class="ftco-section">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center mb-5">
+            <h2 class="heading-section">2024년 6월 11일 오전</h2>
+        </div>
+    </div>
+    <div class="remote">
+        <button onclick="goBack()" class="btn btn-primary">뒤로가기</button>
+    </div>
+    <div class="position-center">
+        <div class="code-area">
+            <h4 class="code-head">useReducer</h4>
+            <h5 class="code-head">useState 대신 useReducer로 todo리스트 관리하기</h5>
+            <xmp class="code-text">
+import './App.css';
+import Header from "./components/Header.jsx";
+import List from "./components/List.jsx";
+import Register from "./components/Register.jsx";
+import {useReducer, useRef, useState} from "react";
+
+const copyData = [
+    {
+        id: 0,
+        isDo: false,
+        content: "스프링 공부하기",
+        date: new Date().getTime(),
+    },
+    {
+        id: 1,
+        isDo: false,
+        content: "프로젝트 스터디 하기",
+        date: new Date().getTime(),
+    },
+    {
+        id: 2,
+        isDo: false,
+        content: "헬스하기",
+        date: new Date().getTime(),
+    },
+]
+
+function reducer(state, action) {
+    switch(action.type){
+        case "create":
+            return [action.data, ...state];
+        case "update":
+            return state.map((todo) => todo.id === action.data ? {...todo, isDo: !todo.isDo } : todo)
+        case "delete":
+            return [...state.filter((todo) => todo.id !== action.data)]
+    }
+}
+
+function App() {
+    const [todos, dispatch] = useReducer(reducer, copyData);
+
+    const idState = useRef(3);
+
+    // 체크박스
+    const onUpdate = (targetId) => {
+        dispatch({
+            type: "update",
+            data: targetId,
+        })
+    }
+
+    const onCreate = (content) => {
+        dispatch({
+            type: "create",
+            data: {
+                id: idState.current++,
+                isDo: false,
+                content: content,
+                date: new Date().getTime(),
+            }
+        });
+    }
+
+    const onDelete = (targetId) => {
+        dispatch({
+            type: "delete",
+            data: targetId,
+        })
+    }
+
+    return (
+        <>
+            <div className={"App"}>
+                <Header/>
+                <Register onCreate={onCreate} />
+                <List todos={todos} onUpdate={onUpdate} onDelete={onDelete}/>
+            </div>
+        </>
+    )
+}
+
+export default App
+
+            </xmp>
+            <h4 class="code-head">useMemo</h4>
+            <h5 class="code-head">useMemo로 현재 리스트의 정보 저장하기</h5>
+            <xmp class="code-text">
+const {total, doCnt, notDo} = useMemo(() => {
+        console.log("호출");
+        const total = props.todos.length;
+        const doCnt = props.todos.filter((todo) => todo.isDo).length;
+
+        const notDo = total - doCnt;
+
+        return {total, doCnt, notDo}
+    }, []); // 콜백함수가 반환하는 값을 그대로 반환해줌/ deps를 기준으로 메모리제이션 함
+    // 빈 배열로 설정했으므로 첫번째 콜백함수의 연산반환이 컴포넌트가 최초로 렌더링 되었을 때 한번만 이루어짐
+    // useMemo로 만들면 연산은 단 한번만 수행
+            </xmp>
+        </div>
+    </div>
+</section>
+
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+</body>
+</html>
