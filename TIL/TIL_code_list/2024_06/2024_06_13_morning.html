@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../css/TIL_style.css">
+    <title>Title</title>
+</head>
+<body>
+<section class="ftco-section">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center mb-5">
+            <h2 class="heading-section">2024년 6월 13일 오전</h2>
+        </div>
+    </div>
+    <div class="remote">
+        <button onclick="goBack()" class="btn btn-primary">뒤로가기</button>
+    </div>
+    <div class="position-center">
+        <div class="code-area">
+            <h4 class="code-head">async로 비동기 함수로 만들기</h4>
+            <xmp class="code-text">
+//async: 함수를 비동기 함수로 만들어주는 키워드
+// 함수가 promise를 반환하도록 변환해주는 키워드
+async function getProfile() {
+    return{
+        name: "홍길동",
+        id: "gildong",
+    };
+}
+
+console.log(getProfile());
+
+async function getProfile2() {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve({
+                name: "홍길동",
+                id: "gildong",
+            })
+        }, 2000);
+    });
+}
+
+getProfile2().then((result) => {
+    console.log(result);
+})
+
+// then 메서드를 안써도 됨 -> 메서드가 호출될 때 까지 기다렸다가 결과값 저장
+// await -> async 안에서만 사용 가능한 키워드
+async function printProfile() {
+    const data = await getProfile2();
+    console.log(data);
+}
+
+printProfile();
+            </xmp>
+        </div>
+    </div>
+</section>
+
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+</body>
+</html>

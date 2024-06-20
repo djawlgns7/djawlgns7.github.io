@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../css/TIL_style.css">
+    <title>Title</title>
+</head>
+<body>
+<section class="ftco-section">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center mb-5">
+            <h2 class="heading-section">2024년 6월 12일 오전</h2>
+        </div>
+    </div>
+    <div class="remote">
+        <button onclick="goBack()" class="btn btn-primary">뒤로가기</button>
+    </div>
+    <div class="position-center">
+        <div class="code-area">
+            <h4 class="code-head">간단한 숫자를 세는 페이지</h4>
+            <h5 class="code-head">useCallback을 사용하지 않은 경우</h5>
+            <xmp class="code-text">
+import React, { useState } from 'react';
+
+const Counter = () => {
+  const [count, setCount] = useState(0);
+
+  const increment = () => {
+    setCount(count + 1);
+  };
+
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={increment}>Increment</button>
+    </div>
+  );
+};
+
+export default Counter;
+            </xmp>
+            <h5 class="code-head">useCallback을 사용한 경우</h5>
+            <xmp class="code-text">
+import React, { useState, useCallback } from 'react';
+
+const Counter = () => {
+  const [count, setCount] = useState(0);
+
+  const increment = useCallback(() => {
+    setCount(count + 1);
+  }, [count]);
+
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={increment}>Increment</button>
+    </div>
+  );
+};
+
+export default Counter;
+            </xmp>
+        </div>
+    </div>
+</section>
+
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+</body>
+</html>
