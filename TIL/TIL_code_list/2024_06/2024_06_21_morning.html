@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../css/TIL_style.css">
+    <title>Title</title>
+</head>
+<body>
+<section class="ftco-section">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center mb-5">
+            <h2 class="heading-section">2024년 5월 1일 오전</h2>
+        </div>
+    </div>
+    <div class="remote">
+        <button onclick="goBack()" class="btn btn-primary">뒤로가기</button>
+    </div>
+    <div class="position-center">
+        <div class="code-area">
+            <h4 class="code-head">Thymeleaf</h4>
+            <h5 class="code-head">컨트롤러</h5>
+            <xmp class="code-text">
+package com.example.demo.controller;
+
+import com.example.demo.entity.Customer;
+import com.example.demo.entity.Review;
+import com.example.demo.service.CustomerService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
+
+@Controller
+@RequestMapping("/customer")
+@RequiredArgsConstructor
+public class CustomerController2 {
+
+    private final CustomerService customerService;
+
+    @GetMapping("/list")
+    public String getCustomers(Model model) {
+        List<Customer> customers = customerService.findAll();
+        model.addAttribute("customers", customers);
+
+        return "customers";
+    }
+
+    @GetMapping("/reviews")
+    public String getReviews(Model model, @RequestParam("id") Long id) {
+        List<Review> reviews = customerService.getReviewByCustomerId(id);
+        model.addAttribute("reviews", reviews);
+
+        return "reviews";
+    }
+}
+            </xmp>
+            <h5 class="code-head">Customers.html</h5>
+            <xmp class="code-text">
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>고객 리스트</h1>
+<table border="1">
+    <thead>
+    <tr>
+        <td>고객 ID</td>
+        <td>고객 아이디</td>
+        <td>고객 이름</td>
+        <td>고객 나이</td>
+        <td>고객 등급</td>
+        <td>고객 직업</td>
+        <td>고객 포인트</td>
+        <td>고객 메뉴</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="customer: ${customers}">
+        <td th:text="${customer.id}"></td>
+        <td th:text="${customer.username}"></td>
+        <td th:text="${customer.customerName}"></td>
+        <td th:text="${customer.age}"></td>
+        <td th:text="${customer.grade}"></td>
+        <td th:text="${customer.job}"></td>
+        <td th:text="${customer.point}"></td>
+        <td>
+            <form th:action="@{/customer/reviews}" method="get">
+                <input type="hidden" name="id" th:value="${customer.id}"/>
+                <button type="submit">리뷰</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>
+            </xmp>
+            <h5 class="code-head">reviews.html</h5>
+            <xmp class="code-text">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>리뷰 리스트</h1>
+<table border="1">
+    <thead>
+    <tr>
+        <td>책 이름</td>
+        <td>내용</td>
+        <td>평균 비용</td>
+        <td>작성 시간</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="review: ${reviews}">
+        <td th:text="${review.book.title}"></td>
+        <td th:text="${review.content}"></td>
+        <td th:text="${review.avgcost}"></td>
+        <td th:text="${review.createdDate}"></td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>
+            </xmp>
+        </div>
+    </div>
+</section>
+
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+</body>
+</html>

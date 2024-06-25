@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../css/TIL_style.css">
+    <title>Title</title>
+</head>
+<body>
+<section class="ftco-section">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center mb-5">
+            <h2 class="heading-section">2024년 6월 20일 오전</h2>
+        </div>
+    </div>
+    <div class="remote">
+        <button onclick="goBack()" class="btn btn-primary">뒤로가기</button>
+    </div>
+    <div class="position-center">
+        <div class="code-area">
+            <h4 class="code-head">사용자 정의 쿼리(JPQL)</h4>
+            <h5 class="code-head">두 가지 쿼리문 작성법</h5>
+            <xmp class="code-text">
+// 사용자 정의 쿼리 (JPQL)
+//@Query(value = "select * from customer where grade=?1", nativeQuery = true)
+@Query("select cust from Customer cust where cust.grade = :grade")
+List<Customer> findByGrade(@Param("grade") String grade);
+
+@Query(value = "select * from customer where grade=?1 and password=?2", nativeQuery = true)
+List<Customer> findByGradeAndPassword(@Param("grade") String grade, @Param("password") String password);
+            </xmp>
+            <h4 class="code-head">QueryDSL</h4>
+            <h5 class="code-head">QueryDSLConfig</h5>
+            <xmp class="code-text">
+package com.example.demo.config;
+
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.EntityManager;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+@RequiredArgsConstructor
+public class QueryDSLConfig {
+
+    private final EntityManager entityManager;
+
+    @Bean
+    public JPAQueryFactory jpaQueryFactory() {
+        return new JPAQueryFactory(entityManager);
+    }
+}
+            </xmp>
+            <h5 class="code-head">CustomerDSLRepository</h5>
+            <xmp class="code-text">
+package com.example.demo.repository;
+
+import com.example.demo.entity.Customer;
+import com.example.demo.entity.QCustomer;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+@RequiredArgsConstructor
+public class CustomerDSLRepository {
+
+    private final JPAQueryFactory jpaQueryFactory;
+
+    public Customer getByUsernameAndPassword(String username, String password) {
+        QCustomer qcustomer = QCustomer.customer;
+        System.out.println("execute");
+
+        return jpaQueryFactory.selectFrom(qcustomer)
+                .where(qcustomer.username.eq(username)
+                        .and(qcustomer.password.eq(password)))
+                .fetchOne();
+    }
+
+    public List<Customer> getGrade(String grade) {
+        QCustomer qcustomer = QCustomer.customer;
+        System.out.println("execute");
+
+        return jpaQueryFactory.selectFrom(qcustomer)
+                .where(qcustomer.grade.eq(grade))
+                .fetch();
+    }
+}
+            </xmp>
+        </div>
+    </div>
+</section>
+
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+</body>
+</html>
