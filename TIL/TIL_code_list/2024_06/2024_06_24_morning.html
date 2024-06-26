@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../css/TIL_style.css">
+    <title>Title</title>
+</head>
+<body>
+<section class="ftco-section">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center mb-5">
+            <h2 class="heading-section">2024년 6월 24일 오전</h2>
+        </div>
+    </div>
+    <div class="remote">
+        <button onclick="goBack()" class="btn btn-primary">뒤로가기</button>
+    </div>
+    <div class="position-center">
+        <div class="code-area">
+            <h4 class="code-head">Spring security</h4>
+            <h5 class="code-head">SecurityConfig.java</h5>
+            <xmp class="code-text">
+package com.example.security.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+public class SecurityConfig {
+
+    @Bean
+    public BCryptPasswordEncoder passwordEncoder(){
+        return new BCryptPasswordEncoder();
+    }
+
+    //인증정보 받는 클래스 -> 클라이언트 요청 url정보를 HttpSecurity에서 받는다
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
+        http.authorizeHttpRequests(authz->authz
+                .requestMatchers("/api/**").authenticated() //api/**경로는 인증 후 접근허용
+                .requestMatchers("/books/**").authenticated()
+                .anyRequest().permitAll()  // 나머지 경로는 인증없이 접근 허용
+        )
+                .formLogin(form->form
+                        .loginPage("/")   //로그인 페이지 url
+                        .loginProcessingUrl("/loginProcess") //url가로채기(username,password) 스프링시큐리티에게 제어권을 넘긴다
+                        .defaultSuccessUrl("/")
+                        .failureUrl("/?error=true")
+                        .permitAll()
+                )
+                .logout(logout->logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/?logout=true")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
+                );
+        return http.build();
+    }
+}
+            </xmp>
+            <h5 class="code-head">CustomerUserDetails.java</h5>
+            <xmp class="code-text">
+package com.example.security.entity;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+
+import java.util.Collection;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+
+public class CustomerUserDetails extends User {  //User(username,password,authorities)
+
+    private Customer customer;  //로그인에 성공한 고객정보(이름, 나이, 직업, 등급.......)
+
+    public CustomerUserDetails(Customer customer){
+        super(customer.getUsername(), customer.getPassword(), getAuthorities(customer.getRoles()));
+        this.customer=customer;  //로그인에 성공한 고객정보(이름, 나이, 직업, 등급.......)
+    }
+
+    public static Collection<? extends GrantedAuthority> getAuthorities(Set<Role> roles) {
+        return roles.stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))
+                //ROLE_USER...
+                .collect(Collectors.toList());
+    }
+
+    public void setCustomer(Customer customer){
+        this.customer=customer;
+    }
+    public Customer getCustomer(){
+        return customer;
+    }
+            </xmp>
+            <h5 class="code-head">MemberUserDetailsService</h5>
+            <xmp class="code-text">
+package com.example.security.service;
+
+import com.example.security.entity.Customer;
+import com.example.security.entity.CustomerUserDetails;
+import com.example.security.repository.MemberRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
+
+@Service
+public class MemberUserDetailsService implements UserDetailsService {
+
+    @Autowired
+    private MemberRepository memberRepository;
+
+    @Transactional  //lazy로딩이여도 세션을 유지시켜 값 가져올수있다
+    @Override  //사용자가 입력한 username, password
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Optional<Customer> optional=memberRepository.findByUsername(username);
+        if(!optional.isPresent()){
+            throw new UsernameNotFoundException(username+"not found");
+        }
+        Customer customer=optional.get(); //role 정보는 가지고 오지 않음
+
+
+        return new CustomerUserDetails(customer);  // 인증이 되었다면 -> 세가지 정보+ @ 리턴받음
+    }
+}
+            </xmp>
+        </div>
+    </div>
+</section>
+
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+</body>
+</html>
