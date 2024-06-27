@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../css/TIL_style.css">
+    <title>Title</title>
+</head>
+<body>
+<section class="ftco-section">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center mb-5">
+            <h2 class="heading-section">2024년 6월 26일 오전</h2>
+        </div>
+    </div>
+    <div class="remote">
+        <button onclick="goBack()" class="btn btn-primary">뒤로가기</button>
+    </div>
+    <div class="position-center">
+        <div class="code-area">
+            <h4 class="code-head">구글 로그인을 통한 회원 인증 및 등록 기능</h4>
+            <h5 class="code-head">SecurityConfig.java</h5>
+            <xmp class="code-text">
+package com.example.oauth2.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+public class SecurityConfig {
+
+    @Bean
+    public BCryptPasswordEncoder bCryptPasswordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http.authorizeRequests(authz -> authz
+                .requestMatchers("/", "/home").permitAll()
+                .anyRequest().authenticated()
+        )
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/")
+                        .defaultSuccessUrl("/home")
+                        .permitAll()
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/home")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
+                );
+
+        return http.build();
+    }
+}
+            </xmp>
+            <h5 class="code-head">PrincipalOauth2Service.java</h5>
+            <xmp class="code-text">
+package com.example.oauth2.service;
+
+import com.example.oauth2.entity.Member;
+import com.example.oauth2.entity.Role;
+import com.example.oauth2.repository.MemberRepository;
+import com.example.oauth2.repository.RoleRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.stereotype.Service;
+
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+
+@Service
+@RequiredArgsConstructor
+public class PrincipalOauth2Service extends DefaultOAuth2UserService {
+
+    private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
+    private final MemberRepository memberRepository;
+
+    @Override
+    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+        OAuth2User oauth2User = super.loadUser(userRequest);
+        String provider = userRequest.getClientRegistration().getRegistrationId();  //google
+        String providerId = oauth2User.getAttribute("sub"); //sub
+        String username = provider + "-" + providerId;
+
+        Optional<Member> optional = memberRepository.findByUsername(username);
+        Member member = null;
+
+        if (optional.isPresent()) {
+            System.out.println("already login");
+            member = optional.get();
+        } else {
+            System.out.println("first oauth login");
+            String password = passwordEncoder.encode("임의값");
+            String uname = (String) oauth2User.getAttribute("name");
+            String email = (String) oauth2User.getAttribute("email");
+
+            Set<Role> roles = new HashSet<>();
+
+            Role userRole = roleRepository.findByName("USER");
+            roles.add(userRole);
+
+            member = new Member();
+            member.setUsername(username);
+            member.setPassword(password);
+            member.setEmail(email);
+            member.setName(uname);
+            member.setProviderId(providerId);
+            member.setProvider(provider);
+            member.setRoles(roles);
+
+            System.out.println(member);
+            memberRepository.save(member);
+        }
+
+        return super.loadUser(userRequest);
+    }
+}
+            </xmp>
+            <h5 class="code-head">CustomerUserDetails.java</h5>
+            <xmp class="code-text">
+package com.example.security.entity;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+
+import java.util.Collection;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+
+public class CustomerUserDetails extends User {  //User(username,password,authorities)
+
+    private Customer customer;  //로그인에 성공한 고객정보(이름, 나이, 직업, 등급.......)
+
+    public CustomerUserDetails(Customer customer){
+        super(customer.getUsername(), customer.getPassword(), getAuthorities(customer.getRoles()));
+        this.customer=customer;  //로그인에 성공한 고객정보(이름, 나이, 직업, 등급.......)
+    }
+
+    public static Collection<? extends GrantedAuthority> getAuthorities(Set<Role> roles) {
+        return roles.stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))
+                //ROLE_USER...
+                .collect(Collectors.toList());
+    }
+
+    public void setCustomer(Customer customer){
+        this.customer=customer;
+    }
+    public Customer getCustomer(){
+        return customer;
+    }
+}
+            </xmp>
+        </div>
+    </div>
+</section>
+
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+</body>
+</html>
