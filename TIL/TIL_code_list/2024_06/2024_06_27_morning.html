@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../css/TIL_style.css">
+    <title>Title</title>
+</head>
+<body>
+<section class="ftco-section">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center mb-5">
+            <h2 class="heading-section">2024년 6월 28일 오전</h2>
+        </div>
+    </div>
+    <div class="remote">
+        <button onclick="goBack()" class="btn btn-primary">뒤로가기</button>
+    </div>
+    <div class="position-center">
+        <div class="code-area">
+            <h4 class="code-head">JWT</h4>
+            <h5 class="code-head">CorsConifg.java</h5>
+            <xmp class="code-text">
+package com.jwt.config;
+
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
+
+@Configuration
+public class CorsConfig {
+
+    @Bean
+    public CorsFilter corsFilter() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration config = new CorsConfiguration(); // CORS 객체
+        config.setAllowCredentials(true);       // CORS 요청 허용
+        config.addAllowedOrigin("*");
+        config.addAllowedHeader("*");
+        config.addAllowedMethod("*");
+        source.registerCorsConfiguration("/api/**", config);
+
+        return new CorsFilter(source);
+    }
+
+}
+            </xmp>
+            <h5 class="code-head">SecutiryConfig.java</h5>
+            <xmp class="code-text">
+package com.jwt.config;
+
+import com.jwt.filter.JwtAuth;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+
+// 기본 security가 적용되지 않게 세팅해야 한다
+@Configuration
+@RequiredArgsConstructor
+public class SecurityConfig {
+
+    private final CorsConfig corsConfig;
+
+    @Bean
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        // JWT: 세션 X
+        // 서버 <------ CORS ------> React.js
+        // 다른 도메인에서 정보를 요청하게 되면 서버에서 막기 때문에 CORS 정책을 풀어줘야 한다
+
+        http.csrf(csrf -> csrf.disable())
+                .sessionManagement(se -> se.sessionCreationPolicy(SessionCreationPolicy.STATELESS))     // 세션을 사용하지 않는다는 선언
+                .formLogin(form -> form.disable())      // form 로그인을 하지 않겠다
+                .httpBasic(hb -> hb.disable())          // 기본적인 인증방식을 쓰지 않겠다
+                .authorizeHttpRequests(authz -> authz
+                        .requestMatchers("/api/ver/user/**").hasAnyRole("ADMIN", "MANAGER", "USER")
+                        .requestMatchers("/api/ver/manager/**").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers("/api/ver/admin/**").hasAnyRole("ADMIN")
+                        .anyRequest().permitAll()
+                )
+                //.addFilter(corsFilter())  //CORS 정책 해제
+                .with(new MyDsl(), build -> build.builder());
+
+        return http.build();
+    }
+
+    // 필터 여러개를 등록하기 위해 -> 사용자 정의(DSL - Domain Specific Language) -> 보안정책을 확장하기 위해
+    public class MyDsl extends AbstractHttpConfigurer<MyDsl, HttpSecurity> {
+
+        public void configure(HttpSecurity http) throws Exception {
+            AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManager.class);
+            http.addFilter(corsConfig.corsFilter())
+                    .addFilter(new JwtAuth(authenticationManager));
+        }
+
+        public HttpSecurity builder() {
+            return getBuilder();
+        }
+    }
+
+}
+            </xmp>
+            <h5 class="code-head">CustomerUser.java</h5>
+            <xmp class="code-text">
+package com.jwt.entity;
+
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Setter
+@Getter
+public class CumtomerUser extends User {
+
+    private Customer customer;
+
+    public CumtomerUser(Customer customer) {
+        super(customer.getUsername(), customer.getPassword(), getAuthorities(customer.getRoleList()));
+        this.customer = customer;
+    }
+
+    public static Collection<? extends GrantedAuthority> getAuthorities(List<String> list) {
+        return list.stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                .collect(Collectors.toList());
+    }
+
+
+}
+            </xmp>
+            <h5 class="code-head">PrincipalDetailsService.java</h5>
+            <xmp class="code-text">
+package com.jwt.service;
+
+import com.jwt.entity.CumtomerUser;
+import com.jwt.entity.Customer;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class PrincipalDetailsService implements UserDetailsService {
+
+    private final CustomerService customerService;
+
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+
+        Customer customer = customerService.findByUsername(username);
+
+        return new CumtomerUser(customer);      // CustomerUser <-- User
+    }
+}
+
+// id, pw -> login -> UsernamePasswordAuthenticationFilter -> PrincipalDetailsService(사용자 정보 리턴 (세가지 + @))
+            </xmp>
+        </div>
+    </div>
+</section>
+
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+</body>
+</html>
