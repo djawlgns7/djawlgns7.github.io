@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../css/TIL_style.css">
+    <title>Title</title>
+</head>
+<body>
+<section class="ftco-section">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center mb-5">
+            <h2 class="heading-section">2024년 7월 2일 오전</h2>
+        </div>
+    </div>
+    <div class="remote">
+        <button onclick="goBack()" class="btn btn-primary">뒤로가기</button>
+    </div>
+    <div class="position-center">
+        <div class="code-area">
+            <h4 class="code-head">QueryDSL</h4>
+            <h5 class="code-head">TodoSearch.java</h5>
+            <xmp class="code-text">
+package com.boot01.repository.search;
+
+import com.boot01.entity.Todo;
+import org.springframework.data.domain.Page;
+
+public interface TodoSearch {
+
+    Page<Todo> search();
+}
+
+            </xmp>
+            <h5 class="code-head">TodoSearchImpl.java</h5>
+            <xmp class="code-text">
+package com.boot01.repository.search;
+
+import com.boot01.entity.QTodo;
+import com.boot01.entity.Todo;
+import com.querydsl.jpa.JPQLQuery;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
+
+public class TodoSearchImpl extends QuerydslRepositorySupport implements TodoSearch {
+
+    public TodoSearchImpl() {
+        super(Todo.class);
+    }
+
+    @Override
+    public Page<Todo> search() {
+
+        QTodo qTodo = QTodo.todo;
+
+        JPQLQuery<Todo> query = from(qTodo);
+
+        query.where(qTodo.title.contains("title"));
+
+        Pageable pageable = PageRequest.of(1, 10, Sort.by("todoNum"));
+
+        this.getQuerydsl().applyPagination(pageable, query);
+
+        query.fetch();
+
+        query.fetchCount();
+
+        return null;
+    }
+}
+
+            </xmp>
+            <h5 class="code-head">TodoRepository.java</h5>
+            <xmp class="code-text">
+package com.boot01.repository;
+
+
+import com.boot01.entity.Todo;
+import com.boot01.repository.search.TodoSearch;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface TodoRepository extends JpaRepository<Todo, Long>, TodoSearch {
+}
+
+            </xmp>
+            <h4 class="code-head">단위 테스트(@Test)</h4>
+            <h5 class="code-head">TodoRepositoryTest.java</h5>
+            <xmp class="code-text">
+package com.boot01.repository;
+
+import com.boot01.entity.Todo;
+import lombok.extern.log4j.Log4j2;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import java.time.LocalDate;
+import java.util.Optional;
+
+@SpringBootTest
+@Log4j2
+public class TodoRepositoryTest {
+
+    @Autowired
+    private TodoRepository todoRepository;
+
+    @Test
+    public void testInsert() {
+        Todo todo = Todo.builder().title("title").content("content").dueDate(LocalDate.of(2024, 7, 2))
+                .build();
+
+        Todo todoResult = todoRepository.save(todo);
+        log.info(todoResult);
+    }
+
+    @Test
+    public void testRead() {
+        Long todoNum = 1L;
+
+        Optional<Todo> optional = todoRepository.findById(todoNum);
+
+        Todo todo = optional.orElseThrow();
+        log.info(todo);
+    }
+
+    @Test
+    public void testUpdate() {
+
+        Todo todo = Todo.builder().todoNum(1L).title("fixed title").content("fixed content").build();
+
+        Todo todoResult = todoRepository.save(todo);
+        log.info(todoResult);
+    }
+
+    @Test
+    public void TestInsertList() {
+
+        int limit = 50;
+
+        while (limit-- > 0) {
+            Todo todo = Todo.builder().title("title" + (49 - limit)).content("content" + (49 - limit))
+                    .dueDate(LocalDate.of(2024, 7, 2)).build();
+
+            Todo todoResult = todoRepository.save(todo);
+            log.info(todoResult);
+        }
+    }
+
+    @Test
+    public void TestDelete() {
+
+        Long todoNum = 1L;
+
+        todoRepository.deleteById(todoNum);
+    }
+
+    @Test
+    public void testSearch() {
+        todoRepository.search();
+    }
+}
+
+            </xmp>
+        </div>
+    </div>
+</section>
+
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+</body>
+</html>
