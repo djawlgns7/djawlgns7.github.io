@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../css/TIL_style.css">
+    <title>Title</title>
+</head>
+<body>
+<section class="ftco-section">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center mb-5">
+            <h2 class="heading-section">2024년 7월 11일 오전</h2>
+        </div>
+    </div>
+    <div class="remote">
+        <button onclick="goBack()" class="btn btn-primary">뒤로가기</button>
+    </div>
+    <div class="position-center">
+        <div class="code-area">
+            <h4 class="code-head">Spring Boot Security</h4>
+            <h5 class="code-head">SecurityConfig.java</h5>
+            <xmp class="code-text">
+package com.example.boot01.config;
+
+import lombok.extern.log4j.Log4j2;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+
+@Configuration
+@EnableWebSecurity
+@Log4j2
+public class SecurityConfig {
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("*"));  // 모든 도메인 허용
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("authorization", "content-type", "x-auth-token"));
+        configuration.setExposedHeaders(Arrays.asList("x-auth-token"));
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        log.info("security!!");
+        http
+                .csrf(csrf -> csrf.disable())  // CSRF 비활성화
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  // 세션 비활성화
+                .cors(httpSecurityCorsConfigurer -> {
+                    httpSecurityCorsConfigurer.configurationSource((corsConfigurationSource()));
+                })// CORS 설정 허용
+                .formLogin(configuration -> configuration.loginPage("/bit/member/login"));
+
+        return http.build();
+    }
+}
+            </xmp>
+            <h5 class="code-head">Member.java</h5>
+            <xmp class="code-text">
+package com.example.boot01.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@ToString(exclude = "memRoleList")  // toString 에서 멤버 권한 목록은 뺌
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
+public class Member {
+
+    @Id
+    private String email;
+
+    private String password;
+    private String nickname;
+    private boolean sLogin;
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<MemberRole> memRoleList = new ArrayList<>();
+
+    public void addRole(MemberRole memberRole) {
+        memRoleList.add(memberRole);
+    }
+}
+            </xmp>
+            <h5 class="code-head">MemberRole.java</h5>
+            <xmp class="code-text">
+package com.example.boot01.entity;
+
+public enum MemberRole {
+
+    USER, MANAGER, ADMIN;
+}
+            </xmp>
+            <h5 class="code-head">MemberRepository.java</h5>
+            <xmp class="code-text">
+package com.example.boot01.repository;
+
+import com.example.boot01.entity.Member;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+public interface MemberRepository extends JpaRepository<Member, String> {
+
+    @EntityGraph(attributePaths = {"memRoleList"})
+    @Query("select mem from Member mem where mem.email = :email")
+    Member getRole(@Param("email") String email);
+}
+            </xmp>
+            <h5 class="code-head">CustomUserDetailsService.java</h5>
+            <xmp class="code-text">
+package com.example.boot01.security;
+
+import com.example.boot01.dto.MemberDTO;
+import com.example.boot01.entity.Member;
+import com.example.boot01.repository.MemberRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
+import java.util.stream.Collectors;
+
+@Service
+@Log4j2
+@RequiredArgsConstructor
+public class CustomUserDetailsService implements UserDetailsService {
+
+    private final MemberRepository memberRepository;
+
+    // 로그인 인증 작업
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+
+        Member member = memberRepository.getRole(username);
+
+        if(member == null) {
+            throw new UsernameNotFoundException("User not found");
+        }
+
+        MemberDTO memberDTO = new MemberDTO(
+                member.getEmail(),
+                member.getPassword(),
+                member.getNickname(),
+                member.isSLogin(),
+                member.getMemRoleList().stream().map(memberRole -> memberRole.name()).collect(Collectors.toList())
+        );
+
+        log.info(memberDTO);
+        return memberDTO;
+    }
+}
+            </xmp>
+        </div>
+    </div>
+</section>
+
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+</body>
+</html>
