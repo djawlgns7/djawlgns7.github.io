@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../css/TIL_style.css">
+    <title>Title</title>
+</head>
+<body>
+<section class="ftco-section">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center mb-5">
+            <h2 class="heading-section">2024년 5월 1일 오전</h2>
+        </div>
+    </div>
+    <div class="remote">
+        <button onclick="goBack()" class="btn btn-primary">뒤로가기</button>
+    </div>
+    <div class="position-center">
+        <div class="code-area">
+            <h4 class="code-head">네이버 클라우드 서버 만들기</h4>
+            <xmp class="code-text">
+1. 서버에 원격접속을 하기 위해 모바엑스텀 설치 (https://moba.softonic.kr/)
+
+2. 네이버 클라우드 서버 생성
+
+    1. 서버 이미지 선택
+
+    2. VPC 생성
+
+    3. 서브넷 생성
+
+    4. 서버 설정
+
+    5. 인증기 생성 밎 저장 (pem 파일)
+    6. 서버 생성
+
+3. 모바엑스텀에서 서버 연결
+
+    1. Session → SSH
+    2. 생성된 서버의 공인 IP 주소, 이름(root), private key를 입력한다
+
+    3. 서버 페이지에서 서버 관리 및 설정 변경 → 관리자 비밀번호 확인 → SSH 키 입력
+    4. 마스터 비밀번호 설정
+
+4. 도커를 우분투에 설치
+
+    1. sudo apt-get update (우분투 시스템 패키지 업데이트)
+    2. sudo apt-get install apt-transport-https ca-certificates curl gnupg-agent software-properties-common (우분투에 필요한 패키지 설치)
+    3. curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add - (curl: url을 통해 파일 다운로드, 도커에 gpg키 추가)
+    4. sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" (도커에 apt 저장소 추가)
+    5. sudo apt-get update (시스템 업데이트)
+    6. sudo apt-get install docker-ce docker-ce-cli [containerd.io](http://containerd.io/) (우분투 시스템에 도커를 설치하는 명령어 - 패키지 세개 설치)
+    7. sudo systemctl status docker (도커 실행 확인)
+            </xmp>
+        </div>
+    </div>
+</section>
+
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+</body>
+</html>
