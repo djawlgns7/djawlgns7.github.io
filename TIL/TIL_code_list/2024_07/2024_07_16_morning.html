@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../css/TIL_style.css">
+    <title>Title</title>
+</head>
+<body>
+<section class="ftco-section">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center mb-5">
+            <h2 class="heading-section">2024년 7월 16일 오전</h2>
+        </div>
+    </div>
+    <div class="remote">
+        <button onclick="goBack()" class="btn btn-primary">뒤로가기</button>
+    </div>
+    <div class="position-center">
+        <div class="code-area">
+            <h4 class="code-head">젠킨스 설지부터 프로젝트 빌드까지</h4>
+            <xmp class="code-text">
+5. 젠킨스를 도커에 설치 (CI/CD) - 자동 통합/자동 배포
+    1. docker run \
+    --name jenkins_1 \
+    -p 8081:8080 \
+    -e TZ=Asia/Seoul \
+    -v /docker_projects/jenkins_1/var/jenkins_home:/var/jenkins_home \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v /docker_projects/jenkins_1/data:/data \
+    -u root \
+    -d \
+    --restart unless-stopped \
+    jenkins/jenkins:lts
+    2. 젠킨스는 호스트의 8081 포트번호에서 접근할 수 있게 된다
+    3. 서버에서 ACG 항목에서 포트번호를 열지 않는다면 외부에서 접근이 불가능 하므로 인바운드 규칙에서 8081 포트번호의 방화벽을 열어준다
+    4. docker exec jenkins_1 cat /var/jenkins_home/secrets/initialAdminPassword
+    (초기 관리자 비밀번호 출력)
+    5. (서버의 IP 주소):8081 로 젠킨스에 접속이 가능하다
+    6. 로그인 후 Install suggested downloads를 다운받는다 (왼쪽 버튼)
+    7. 다운이 끝나면 관리자 계정을 생성한다
+6. 도커에 설치한 젠킨스로 들어간다
+    1. docker exec -it jenkins_1 bash (실행중인 jenkins_1 컨테이너에 접속해 bash 쉘 시작 - 컨테이너 내부에서 직접 명령어 실행 가능)
+7. mlocate 설치 (파일 시스템 내의 파일과 디렉터리를 빠르게 검색할 수 있는 도구. 보안도 좋고 데이터베이스도 업데이트할 수 있다)
+    1. apt update
+    2. apt install mlocate
+8. 저장소, 키 추가 및 패키지 업데이트
+    1. apt-get update -y
+    (패키지 업데이트)
+    2. apt-get install -y ca-certificates curl gnupg lsb-release
+    3. mkdir -p /etc/apt/keyrings
+    (저장소 생성)
+    4. rm /etc/apt/keyrings/docker.gpg
+    (기존 docker gpg 키 제거)
+    5. curl -fsSL [https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg](https://download.docker.com/linux/debian/gpg%C2%A0%7C%C2%A0gpg%C2%A0--dearmor%C2%A0-o%C2%A0/etc/apt/keyrings/docker.gpg)
+    (docker 공식 키 추가)
+    6. echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] [https://download.docker.com/linux/debian \](https://download.docker.com/linux/debian%C2%A0%5C)
+    $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+    (docker 저장소 추가)
+    7. apt-get update
+    (패키지 업데이트)
+    8. apt-get install -y docker-ce docker-ce-cli docker-compose-plugin
+    (도커 관련 패키지 설치)
+    9. exit (셸 종료)
+9. 새로운 디렉토리 생성 / 특정 사용자에게 소유권 부여
+    1. sudo rm -rf /docker_projects/aaaaa/project
+    (해당 위치에 있는 파일 강제 삭제)
+    2. sudo mkdir -p /docker_projects/aaaaa/project
+    (해당 위치에 디렉토리 생성)
+    3. cd /docker_projects/aaaaa/project/
+10. 프로젝트의 최상단 디렉토리에 Dockerfile 생성
+    1. Dockerfile
+
+        ```docker
+        FROM openjdk:17
+        ARG JAR_FILE=build/libs/프로젝트명-0.0.1-SNAPSHOT.jar
+        COPY ${JAR_FILE} app.jar
+        ENTRYPOINT ["java","-jar","/app.jar"]
+        ```
+
+    2. 해당 파일은 깃허브에 업로드를 해야 한다
+11. 깃허브 레포지토리를 서버에 복사한다
+    1. “git clone [https://<토큰>@](https://%3CTOKEN%3E@github.com/djawlgns7/student_management_board.git)레포지토리 주소” 명령어를 통해서 레포지토리를 복사한다
+    2. cd 레포지토리 이름
+    3. ls
+    4. chmod 744 ./gradlew
+    (권한 부여)
+    5. sudo apt update
+    6. sudo apt install openjdk-17-jdk
+    (jdk 17버전 설치)
+    7. ./gradlew clean build
+            </xmp>
+        </div>
+    </div>
+</section>
+
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+</body>
+</html>
