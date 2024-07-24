@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../css/TIL_style.css">
+    <title>Title</title>
+</head>
+<body>
+<section class="ftco-section">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center mb-5">
+            <h2 class="heading-section">2024년 5월 1일 오전</h2>
+        </div>
+    </div>
+    <div class="remote">
+        <button onclick="goBack()" class="btn btn-primary">뒤로가기</button>
+    </div>
+    <div class="position-center">
+        <div class="code-area">
+            <h4 class="code-head">백앤드 서버 호스팅 이어서</h4>
+            <xmp class="code-text">
+12. build/libs에 빌드 파일이 생성된 것을 확인하고 도커를 이용해서 이미지로 빌드한다
+    1. 프로젝트의 루트 디렉토리로 이동한다
+    2. git pull
+    3. docker build -t aaaaa .
+    (도커파일을 찾아서 이미지로 빌드한 뒤 aaaaa 라는 태그를 붙임. 공백과 점까지 명령어임)
+    4. (서버의 공인 IP 주소)[/view/all/newJob](http://223.130.142.88:8081/view/all/newJob) 로 들어간다
+
+    5. Pipeline 생성 → GitHub project 와 GitHub hook trigger for GITScm polling 체크
+
+    6. 파이프라인 스크립트 작성 (한글로 작성된 부분은 프로젝트에 맞게 수정 필요, 주석처리된 부분은 레포지토리가 private여서 깃허브 토큰이 필요한 경우 주석을 풀고 작성)
+
+        ```docker
+        pipeline {
+            agent any
+
+            tools {
+                jdk 'openjdk-17-jdk'
+            }
+
+            //environment {
+            //    GIT_CREDENTIALS_ID = '깃허브 토큰이 포함된 credential'
+            //}
+
+            stages {
+                stage('Prepare') {
+                    steps {
+                        git(
+                            branch: '원하는 브랜치 이름',
+                            url: '깃허브 레포지토리 주소',
+                            //credentialsId: env.GIT_CREDENTIALS_ID
+                        )
+                    }
+
+                    post {
+                        success {
+                            sh 'echo "Successfully Cloned Repository"'
+                        }
+                        failure {
+                            sh 'echo "Fail Cloned Repository"'
+                        }
+                    }
+                }
+
+                stage('Build Gradle Test') {
+                    steps {
+                        sh 'echo "Build Gradle Test Start"'
+
+                        dir('.') {
+                            sh 'chmod +x gradlew'
+                        }
+
+                        dir('.') {
+                            sh './gradlew clean build'
+                        }
+                    }
+
+                    post {
+                        success {
+                            sh 'echo "Successfully Build Gradle Test"'
+                        }
+                        failure {
+                            sh 'echo "Fail Build Gradle Test"'
+                        }
+                    }
+                }
+
+                stage('Docker Rm') {
+                    steps {
+                        sh 'echo "Docker Run Start"'
+                        sh """
+                        docker stop timecapsule
+                        docker rm -f timecapsule
+                        docker rmi -f timecapsule
+                        """
+                    }
+
+                    post {
+                        success {
+                            sh 'echo "Docker Rm Success"'
+                        }
+                        failure {
+                            sh 'echo "Docker Rm Fail"'
+                        }
+                    }
+                }
+
+                stage('Build Docker Image') { // 단계 이름 수정
+                    steps {
+                        sh 'echo "Image Build Start"'
+                        sh 'docker build -t timecapsule .'
+                    }
+
+                    post {
+                        success {
+                            sh 'echo "Build Docker Image Success"'
+                        }
+                        failure {
+                            sh 'echo "Build Docker Image Fail"'
+                        }
+                    }
+                }
+
+                stage('Docker Run') {
+                    steps {
+                        sh 'echo "Docker Run Start"'
+                        sh """
+                        docker run \
+                          --name=timecapsule \
+                          -p 80:8080 \
+                          -v /docker_projects/aaaaa/volumes/gen:/gen \
+                          --restart unless-stopped \
+                          -e TZ=Asia/Seoul \
+                          -d \
+                          timecapsule
+                        """
+                    }
+
+                    post {
+                        success {
+                            sh 'echo "Docker Run Success"'
+                        }
+                        failure {
+                            sh 'echo "Docker Run Fail"'
+                        }
+                    }
+                }
+            }
+        }
+
+        ```
+
+        - git에서 코드 클론
+        - gradle을 이용해서 프로젝트 빌드&테스트
+        - 기존 docker 이미지 중지/제거
+        - 새 docker 이미지 빌드
+        - 새 docker 이미지 사용해 docker 컨테이너 실행
+    7. Dashboard → Jenkins 관리 → Tools 에서 Git installations 삭제
+
+    8. JDK installations 에서 JDK 추가 (Name: openjdk-17-jdk, Java_HOME: /opt/java/openjdk) 후 저장
+
+    9. MobaXterm으로 돌아와서 프로젝트의 루트 디렉토리에서 명령어를 실행해서 이미지 생성 (공백과 점까지 명령어임)
+    docker build -t timecapsule .
+    10. 생성된 이미지를 확인하고 싶으면 docker image ls 명령어 실행
+    11. 명령어 실행
+
+        ```docker
+        docker run \
+          --name=timecapsule \
+          -p 8080:8080 \
+          -v /docker_projects/aaaaa/volumes/gen:/gen \
+          --restart unless-stopped \
+          -e TZ=Asia/Seoul \
+          -d \
+          timecapsule
+        ```
+
+    12. curl [http://localhost:8080](http://localhost:8080/) 명령어를 실행
+    13. 젠킨스로 돌아와서 빌드 버튼 클릭
+13. 깃허브 설정
+    1. 깃허브 개발자 페이지에서 웹 훅 토큰 생성 - repo 와 admin:repo_hook, admin:org 체크 후 생성 (나중에 오류나면 그냥 아무거나 막 넣어보세요)
+    2. 레포지토리의 웹 훅 설정
+
+    3. URL: [http://공인IP](http://xn--ip-he2ix98f/):포트번호/github-webhook/
+    Content type: application/json
+    SSL verification: Disable
+
+14. 젠킨스에서 Credentials 설정
+    1. Dashboard → Jenkins 관리 → Credentials → System → Global Credentials → New Credentials 에서 추가
+    2. Kind는 Secret text, 방금 생성한 토큰과 ID를 임의로 입력
+
+    3. 새로운 파이프라인 생성 (Dashboard → 새로운 Item → Pipeline)
+    12.e 와 동일한 옵션 체크 후 파이프라인 스크립트 작성 (스크립트의 한글 부분은 수정할 것)
+
+        ```docker
+        pipeline {
+            agent any
+
+            tools {
+                jdk 'openjdk-17-jdk'
+            }
+
+            environment {
+                GITHUB_CREDENTIALS_ID = '아까 설정한 내 Credentials'  // 자격 증명 ID
+            }
+
+            triggers {
+                githubPush()  // GitHub Webhook 트리거 추가
+            }
+
+            stages {
+                stage('Prepare') {
+                    steps {
+                        git branch: '브랜치',
+                            credentialsId: env.GITHUB_CREDENTIALS_ID,
+                            url: '깃허브 브랜치'
+                    }
+
+                    post {
+                        success {
+                            sh 'echo "Successfully Cloned Repository"'
+                        }
+                        failure {
+                            sh 'echo "Fail Cloned Repository"'
+                        }
+                    }
+                }
+
+                stage('Build Gradle Test') {
+                    steps {
+                        sh 'echo "Build Gradle Test Start"'
+
+                        dir('.') {
+                            sh 'chmod +x gradlew'
+                        }
+
+                        dir('.') {
+                            sh './gradlew clean build'
+                        }
+                    }
+
+                    post {
+                        success {
+                            sh 'echo "Successfully Build Gradle Test"'
+                        }
+                        failure {
+                            sh 'echo "Fail Build Gradle Test"'
+                        }
+                    }
+                }
+
+                stage('Docker Rm') {
+                    steps {
+                        sh 'echo "Docker Remove Start"'
+                        sh '''
+                        docker stop timecapsule || true
+                        docker rm -f timecapsule || true
+                        docker rmi -f timecapsule || true
+                        '''
+                    }
+
+                    post {
+                        success {
+                            sh 'echo "Docker Rm Success"'
+                        }
+                        failure {
+                            sh 'echo "Docker Rm Fail"'
+                        }
+                    }
+                }
+
+                stage('Build Docker Image') {
+                    steps {
+                        sh 'echo "Image Build Start"'
+                        sh 'docker build -t timecapsule .'
+                    }
+
+                    post {
+                        success {
+                            sh 'echo "Build Docker Image Success"'
+                        }
+                        failure {
+                            sh 'echo "Build Docker Image Fail"'
+                        }
+                    }
+                }
+
+                stage('Docker Run') {
+                    steps {
+                        sh 'echo "Docker Run Start"'
+                        sh '''
+                        docker run \
+                          --name=timecapsule \
+                          -p 80:8080 \
+                          -v /docker_projects/aaaaa/volumes/gen:/gen \
+                          --restart unless-stopped \
+                          -e TZ=Asia/Seoul \
+                          -d \
+                          timecapsule
+                        '''
+                    }
+
+                    post {
+                        success {
+                            sh 'echo "Docker Run Success"'
+                        }
+                        failure {
+                            sh 'echo "Docker Run Fail"'
+                        }
+                    }
+                }
+            }
+        }
+
+        ```
+
+15. Dashboard → Jenkins관리 → System 에서 깃허브 설정 추가
+(이름은 임의로 지정, Credentials는 아까 생성한 것)
+
+16. Dashboard → Jenkins관리 → Plugins 에서 Github Integration 다운로드
+17. (공인 IP 주소) 를 주소창에 입력할 경우 호스팅한 내용을 불러올 수 있다
+            </xmp>
+        </div>
+    </div>
+</section>
+
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+</body>
+</html>

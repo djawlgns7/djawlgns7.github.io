@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../css/TIL_style.css">
+    <title>Title</title>
+</head>
+<body>
+<section class="ftco-section">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center mb-5">
+            <h2 class="heading-section">2024년 5월 1일 오전</h2>
+        </div>
+    </div>
+    <div class="remote">
+        <button onclick="goBack()" class="btn btn-primary">뒤로가기</button>
+    </div>
+    <div class="position-center">
+        <div class="code-area">
+            <h4 class="code-head">클라우드 DB 사용하기</h4>
+            <xmp class="code-text">
+1. 네이버 클라우드의 cloud DB for MySQL에 들어가기
+
+2. 서버  생성
+
+3. 생성된 DB 선택 → DB 관리 클릭 → public 도메인 신청 클릭
+
+4. Server → ACG 에서 clout-… 로 되어있는 이름을 선택하고 ACG 설정 클릭
+
+5. 인바운드 설정 에서 3306 포트 열기
+
+6. public 도메인 이름, userID, password로 db에 접속이 가능하다
+            </xmp>
+        </div>
+    </div>
+</section>
+
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+</body>
+</html>
