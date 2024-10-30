@@ -1,14 +1,116 @@
 <!doctype html>
 <html class="no-js" lang="">
 <head>
-  <title></title>
-  <meta charset="utf-8">
-  <link rel="stylesheet" href="css/style.css">
+    <title></title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="css/index.css">
 </head>
 <body>
-  <p>Hello world! This is HTML5 Boilerplate.</p>
-  <a href="TIL/TIL_Jihun.html">TIL으로 이동하기</a>
-  <a href="external_files/MVCProject2.zip" class="btn btn-primary" target="_blank">나의 코드</a>
-  <script src=""></script>
+<div class="background">
+    <div>
+        <h2>Profile</h2>
+        <hr>
+        <div class="profile">
+            <div>
+                <img class="portrait" src="external_files/증명사진.jpg" alt="프로필 이미지"/>
+            </div>
+            <div>
+                <h3>안녕하세요. 웹 개발자 엄지훈입니다.</h3>
+                저는 풀스택 개발자로써 다양한 프론트엔드와 백엔드 기술을 활용하여 웹 페이지를 만들 수 있습니다.<br><br>
+                AWS(아마존 웹 서버) 혹은 NCP(네이버 클라우드 플랫폼)을 활용하여 서버를 호스팅 후 관리 해 본 경험이 있고, Docker와 Jenkins를 활용하여 배포와 빌드를 자동화하여 팀의
+                개발
+                및 배포 효율성을 높인 경험이 있습니다.
+            </div>
+        </div>
+    </div>
+    <div>
+        <h2>TIL(Today I Learned)</h2>
+        <hr>
+        <div>매일 배운 내용들을 간단하게 표 형식으로 정리해 보았습니다. <a href="TIL/TIL_Jihun.html" target="_blank">이 글자를 클릭하면 TIL 페이지로
+            이동합니다.</a></div>
+    </div>
+    <div>
+        <h2>Projects</h2>
+        <hr>
+        <div>담당한 프로젝트를 기간 순으로 배치했습니다.</div>
+        <h3>HouseKeeping (2024.07.08 ~ 2024.08.25)</h3>
+        <img class="thumbnail" src="external_files/HouseKeeping_thumbnail.png" alt="HouseKeeping 이미지"/>
+        <div>
+            혼자 자취하는 사회 초년생들을 위한 사이트입니다. 사용자의 의식주를 전부 관리해주는 기능이 있습니다.<br>
+            방 청소 루틴을 설정하고 이를 어길 경우 알림 메시지가 오고 내 방의 오염도가 증가하는 기능,<br>
+            내 냉장고 안에 있는 식재료를 관리할 수 있고 현재 냉장고 안에 있는 식재료로 할 수 있는 요리를 추천해 주는 기능,<br>
+            옷장 안에 있는 옷을 등록하여 한눈에 보면서 관리할 수 있고 현재 날씨를 고려해서 어떤 옷을 입을 지 추천하는 기능 등이 있습니다.
+        </div>
+        <br>
+        <a href="https://github.com/KitsuneSiho/HOUSEKEEPING_FRONTEND" target="_blank">
+            <img src="https://img.shields.io/badge/GitHub-프론트엔드-181717?logo=github"
+                 alt="GitHub 프로필" style="height: 25px">
+        </a>
+        <br>
+        <a href="https://github.com/KitsuneSiho/HOUSEKEEPING_BACKEND" target="_blank">
+            <img src="https://img.shields.io/badge/GitHub-백엔드-181717?logo=github"
+                 alt="GitHub 프로필" style="height: 25px">
+        </a>
+        <br>
+        <a href="https://github.com/djawlgns7/socketio-server" target="_blank">
+            <img src="https://img.shields.io/badge/GitHub-소켓_서버-181717?logo=github"
+                 alt="GitHub 프로필" style="height: 25px">
+        </a>
+        <br>
+        <a href="external_files/housekeeping.pdf" target="_blank">
+            <img src="https://img.shields.io/badge/-PDF-red?logo=adobeacrobatreader&logoColor=white"
+                 alt="adobeacrobatreader" style="height: 25px;">
+        </a>
+        <br>
+        <a href="external_files/housekeeping.pptx" target="_blank">
+            <img src="https://img.shields.io/badge/-PPT-B7472A?logo=microsoftpowerpoint&logoColor=white"
+                 alt="microsoftpowerpoint" style="height: 25px;">
+        </a>
+        <h3>Q2Beat (2024.06.03 ~ 2024.07.05)</h3>
+        <img class="thumbnail" src="external_files/Q2Beat_thumbnail.png" alt="HouseKeeping 이미지"/>
+        <div>
+            핸드폰만 가지고 있다면 누구나 참여 가능한 퀴즈 게임입니다.<br>
+            호스트가 방을 만든 뒤, QR 코드 혹은 url을 활용하여 핸드폰으로 방에 입장을 하고, 다같이 퀴즈를 풀어서 순위를 가릴 수 있습니다.<br>
+            단순한 퀴즈 뿐만 아니라 음성 인식과 문자열 비교 알고리즘을 활용한 잰말놀이 퀴즈,<br>
+            Machine Leaning을 활용한 모델이 두 사진의 유사도를 측정하여 주어진 포즈와 얼마나 비슷한 포즈를 취했는지 볼 수 있는 포토제닉 퀴즈 등이 있습니다.
+        </div>
+        <br>
+        <a href="https://github.com/djawlgns7/Q2Beat" target="_blank">
+            <img src="https://img.shields.io/badge/GitHub-프론트엔드 & 백엔드-181717?logo=github"
+                 alt="GitHub 프로필" style="height: 25px">
+        </a>
+        <br>
+        <a href="external_files/Q2Beat(2조)_발표자료_최종.pdf" target="_blank">
+            <img src="https://img.shields.io/badge/-PDF-red?logo=adobeacrobatreader&logoColor=white"
+                 alt="adobeacrobatreader" style="height: 25px;">
+        </a>
+        <h3>JavaGym (2024.03.25 ~ 2024.04.22)</h3>
+        <img class="thumbnail" src="external_files/JavaGym_thumbnail.png" alt="HouseKeeping 이미지"/>
+        <div>
+            혼자 자취하는 사회 초년생들을 위한 사이트입니다. 사용자의 의식주를 전부 관리해주는 기능이 있습니다.<br>
+            방 청소 루틴을 설정하고 이를 어길 경우 알림 메시지가 오거나, 현재 냉장고 안에 있는 식재료로 할 수 있는 요리를 추천해주기,
+            옷장 안에 있는 옷과 현재 날씨를 고려해서 어떤 옷을 입을 지 추천하는 기능 등이 있습니다.
+        </div>
+        <a href="https://github.com/djawlgns7/JavaGym" target="_blank">
+            <img src="https://img.shields.io/badge/GitHub-프론트엔드 & 백엔드-181717?logo=github"
+                 alt="GitHub 프로필" style="height: 25px">
+        </a>
+        <br>
+        <a href="external_files/JavaGym.pdf" target="_blank">
+            <img src="https://img.shields.io/badge/-PDF-red?logo=adobeacrobatreader&logoColor=white"
+                 alt="adobeacrobatreader" style="height: 25px;">
+        </a>
+        <br>
+        <a href="external_files/JavaGym.pptx" target="_blank">
+            <img src="https://img.shields.io/badge/-PPT-B7472A?logo=microsoftpowerpoint&logoColor=white"
+                 alt="microsoftpowerpoint" style="height: 25px;">
+        </a>
+    </div>
+    <div>
+        <h2>Github</h2>
+        <hr>
+        <a href="https://github.com/djawlgns7" target="_blank">깃허브 페이지로 이동하기</a>
+    </div>
+</div>
 </body>
 </html>

@@ -1,0 +1,26 @@
+body {
+    display: flex;
+    justify-content: center;
+    padding-bottom: 200px;
+}
+
+.background {
+    width: 60%;
+}
+
+.profile {
+    display: flex;
+    flex-direction: row;
+}
+
+.profile > div {
+    padding: 10px;
+}
+
+.portrait {
+    width: 150px;
+}
+
+.thumbnail {
+    height: 350px;
+}
