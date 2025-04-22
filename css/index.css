@@ -24,3 +24,22 @@ body {
 .thumbnail {
     height: 350px;
 }
+
+.thumbnail_small {
+    height: 250px;
+}
+
+.thumbnail_area {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.thumbnail_box {
+    padding: 10px;
+    text-align: center;
+}
+
+.thumbnail_description {
+    text-align: center;
+}
